@@ -7,7 +7,7 @@
     "parcel": "^2.10.2"
   },
   "dependencies": {
-    "@parcel/plugin": "^2.10.2",
-    "@internationalized/string-compiler": "^3.0.0"
+    "@internationalized/string-compiler": "^3.0.0",
+    "@parcel/plugin": "^2.10.2"
   }
 }

@@ -189,7 +189,10 @@
   "@parcel/transformer-css": {
     "cssModules": {
       "global": true,
-      "exclude": ["**/*.global.css", "packages/@react-aria/example-theme/**"]
+      "exclude": [
+        "**/*.global.css",
+        "packages/@react-aria/example-theme/**"
+      ]
     },
     "drafts": {
       "nesting": true
