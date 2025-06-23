@@ -10,40 +10,50 @@
  * governing permissions and limitations under the License.
  */
 
-import {act, fireEvent, render, triggerPress, within} from '@react-spectrum/test-utils';
+import { act, fireEvent, render, triggerPress, within } from '@react-spectrum/test-utils';
 import Bell from '@spectrum-icons/workflow/Bell';
-import {FocusExample} from '../stories/ListBox.stories';
-import {Item, ListBox, Section} from '../';
-import {Provider} from '@react-spectrum/provider';
+import { FocusExample } from '../stories/ListBox.stories';
+import { Item, ListBox, Section } from '../';
+import { Provider } from '@react-spectrum/provider';
 import React from 'react';
-import {Text} from '@react-spectrum/text';
-import {theme} from '@react-spectrum/theme-default';
+import { Text } from '@react-spectrum/text';
+import { theme } from '@react-spectrum/theme-default';
 
 let withSection = [
-  {name: 'Heading 1', children: [
-    {name: 'Foo'},
-    {name: 'Bar'},
-    {name: 'Baz'}
-  ]},
-  {name: 'Heading 2', children: [
-    {name: 'Blah'},
-    {name: 'Bleh'}
-  ]},
-  {name: 'Heading 3', children: [
-    {name: 'Foo Bar'},
-    {name: 'Foo Baz'}
-  ]}
+  {
+    name: 'Heading 1', children: [
+      { name: 'Foo' },
+      { name: 'Bar' },
+      { name: 'Baz' }
+    ]
+  },
+  {
+    name: 'Heading 2', children: [
+      { name: 'Blah' },
+      { name: 'Bleh' }
+    ]
+  },
+  {
+    name: 'Heading 3', children: [
+      { name: 'Foo Bar' },
+      { name: 'Foo Baz' }
+    ]
+  }
 ];
 
 let itemsWithFalsyId = [
-  {id: 0, name: 'Heading 1', children: [
-    {id: 1, name: 'Foo'},
-    {id: 2, name: 'Bar'}
-  ]},
-  {id: '', name: 'Heading 2', children: [
-    {id: 3, name: 'Blah'},
-    {id: 4, name: 'Bleh'}
-  ]}
+  {
+    id: 0, name: 'Heading 1', children: [
+      { id: 1, name: 'Foo' },
+      { id: 2, name: 'Bar' }
+    ]
+  },
+  {
+    id: '', name: 'Heading 2', children: [
+      { id: 3, name: 'Blah' },
+      { id: 4, name: 'Bleh' }
+    ]
+  }
 ];
 
 function renderComponent(props) {
@@ -98,11 +108,15 @@ describe('ListBox', function () {
       expect(section).toHaveAttribute('aria-labelledby');
       let heading = document.getElementById(section.getAttribute('aria-labelledby'));
       expect(heading).toBeTruthy();
-      expect(heading).toHaveAttribute('aria-hidden', 'true');
-    }
+      expect(heading).toHaveAttribute('role', 'presentation');
 
-    let dividers = within(listbox).getAllByRole('separator');
-    expect(dividers.length).toBe(withSection.length - 1);
+      // Separator should render for sections after first section
+      if (section !== sections[0]) {
+        let divider = heading.previousElementSibling;
+        expect(divider).toHaveAttribute('role', 'presentation');
+        expect(divider).toHaveClass('spectrum-Menu-divider');
+      }
+    }
 
     let items = within(listbox).getAllByRole('option');
     expect(items.length).toBe(withSection.reduce((acc, curr) => (acc + curr.children.length), 0));
@@ -129,7 +143,7 @@ describe('ListBox', function () {
   });
 
   it('renders with falsy id', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <Provider theme={theme}>
         <ListBox items={itemsWithFalsyId} aria-label="listbox">
           {item => (
@@ -158,35 +172,35 @@ describe('ListBox', function () {
   });
 
   it('allows user to change menu item focus via up/down arrow keys', function () {
-    let tree = renderComponent({autoFocus: 'first'});
+    let tree = renderComponent({ autoFocus: 'first' });
     let listbox = tree.getByRole('listbox');
     let options = within(listbox).getAllByRole('option');
     let selectedItem = options[0];
     expect(document.activeElement).toBe(selectedItem);
-    fireEvent.keyDown(selectedItem, {key: 'ArrowDown', code: 40, charCode: 40});
+    fireEvent.keyDown(selectedItem, { key: 'ArrowDown', code: 40, charCode: 40 });
     let nextSelectedItem = options[1];
     expect(document.activeElement).toBe(nextSelectedItem);
-    fireEvent.keyDown(nextSelectedItem, {key: 'ArrowUp', code: 38, charCode: 38});
+    fireEvent.keyDown(nextSelectedItem, { key: 'ArrowUp', code: 38, charCode: 38 });
     expect(document.activeElement).toBe(selectedItem);
   });
 
   it('wraps focus from first to last/last to first item if up/down arrow is pressed if shouldFocusWrap is true', function () {
-    let tree = renderComponent({autoFocus: 'first', shouldFocusWrap: true});
+    let tree = renderComponent({ autoFocus: 'first', shouldFocusWrap: true });
     let listbox = tree.getByRole('listbox');
     let options = within(listbox).getAllByRole('option');
     let firstItem = options[0];
     expect(document.activeElement).toBe(firstItem);
-    fireEvent.keyDown(firstItem, {key: 'ArrowUp', code: 38, charCode: 38});
+    fireEvent.keyDown(firstItem, { key: 'ArrowUp', code: 38, charCode: 38 });
     let lastItem = options[options.length - 1];
     expect(document.activeElement).toBe(lastItem);
-    fireEvent.keyDown(lastItem, {key: 'ArrowDown', code: 40, charCode: 40});
+    fireEvent.keyDown(lastItem, { key: 'ArrowDown', code: 40, charCode: 40 });
     expect(document.activeElement).toBe(firstItem);
   });
 
   describe('supports single selection', function () {
     it('supports defaultSelectedKeys (uncontrolled)', function () {
       // Check that correct menu item is selected by default
-      let tree = renderComponent({onSelectionChange, defaultSelectedKeys: ['Blah'], autoFocus: 'first', selectionMode: 'single'});
+      let tree = renderComponent({ onSelectionChange, defaultSelectedKeys: ['Blah'], autoFocus: 'first', selectionMode: 'single' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
       let selectedItem = options[3];
@@ -195,20 +209,20 @@ describe('ListBox', function () {
       expect(selectedItem).toHaveAttribute('tabindex', '0');
       let itemText = within(selectedItem).getByText('Blah');
       expect(itemText).toBeTruthy();
-      let checkmark = within(selectedItem).getByRole('img', {hidden: true});
+      let checkmark = within(selectedItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Select a different menu item via enter
       let nextSelectedItem = options[4];
-      fireEvent.keyDown(nextSelectedItem, {key: 'Enter', code: 13, charCode: 13});
+      fireEvent.keyDown(nextSelectedItem, { key: 'Enter', code: 13, charCode: 13 });
       expect(nextSelectedItem).toHaveAttribute('aria-selected', 'true');
       itemText = within(nextSelectedItem).getByText('Bleh');
       expect(itemText).toBeTruthy();
-      checkmark = within(nextSelectedItem).getByRole('img', {hidden: true});
+      checkmark = within(nextSelectedItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Make sure there is only a single checkmark in the entire menu
-      let checkmarks = tree.getAllByRole('img', {hidden: true});
+      let checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(1);
 
       expect(onSelectionChange).toBeCalledTimes(1);
@@ -217,7 +231,7 @@ describe('ListBox', function () {
 
     it('supports selectedKeys (controlled)', function () {
       // Check that correct menu item is selected by default
-      let tree = renderComponent({onSelectionChange, selectedKeys: ['Blah'], autoFocus: 'first', selectionMode: 'single'});
+      let tree = renderComponent({ onSelectionChange, selectedKeys: ['Blah'], autoFocus: 'first', selectionMode: 'single' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
       let selectedItem = options[3];
@@ -226,19 +240,19 @@ describe('ListBox', function () {
       expect(selectedItem).toHaveAttribute('tabindex', '0');
       let itemText = within(selectedItem).getByText('Blah');
       expect(itemText).toBeTruthy();
-      let checkmark = within(selectedItem).getByRole('img', {hidden: true});
+      let checkmark = within(selectedItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Select a different menu item via enter
       let nextSelectedItem = options[4];
-      fireEvent.keyDown(nextSelectedItem, {key: 'Enter', code: 13, charCode: 13});
+      fireEvent.keyDown(nextSelectedItem, { key: 'Enter', code: 13, charCode: 13 });
       expect(nextSelectedItem).toHaveAttribute('aria-selected', 'false');
       expect(selectedItem).toHaveAttribute('aria-selected', 'true');
-      checkmark = within(selectedItem).getByRole('img', {hidden: true});
+      checkmark = within(selectedItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Make sure there is only a single checkmark in the entire menu
-      let checkmarks = tree.getAllByRole('img', {hidden: true});
+      let checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(1);
 
       expect(onSelectionChange).toBeCalledTimes(1);
@@ -246,19 +260,19 @@ describe('ListBox', function () {
     });
 
     it('supports using space key to change item selection', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'single'});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'single' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
 
       // Trigger a menu item via space
       let item = options[4];
-      fireEvent.keyDown(item, {key: ' ', code: 32, charCode: 32});
+      fireEvent.keyDown(item, { key: ' ', code: 32, charCode: 32 });
       expect(item).toHaveAttribute('aria-selected', 'true');
-      let checkmark = within(item).getByRole('img', {hidden: true});
+      let checkmark = within(item).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Make sure there is only a single checkmark in the entire menu
-      let checkmarks = tree.getAllByRole('img', {hidden: true});
+      let checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(1);
 
       // Verify onSelectionChange is called
@@ -267,7 +281,7 @@ describe('ListBox', function () {
     });
 
     it('supports using click to change item selection', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'single'});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'single' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
 
@@ -275,11 +289,11 @@ describe('ListBox', function () {
       let item = options[4];
       triggerPress(item);
       expect(item).toHaveAttribute('aria-selected', 'true');
-      let checkmark = within(item).getByRole('img', {hidden: true});
+      let checkmark = within(item).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Make sure there is only a single checkmark in the entire menu
-      let checkmarks = tree.getAllByRole('img', {hidden: true});
+      let checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(1);
 
       // Verify onSelectionChange is called
@@ -288,7 +302,7 @@ describe('ListBox', function () {
     });
 
     it('supports disabled items', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'single', disabledKeys: ['Baz'], autoFocus: 'first'});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'single', disabledKeys: ['Baz'], autoFocus: 'first' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
 
@@ -307,20 +321,20 @@ describe('ListBox', function () {
 
       // Verify that keyboard navigation skips disabled items
       expect(document.activeElement).toBe(options[0]);
-      fireEvent.keyDown(listbox, {key: 'ArrowDown', code: 40, charCode: 40});
+      fireEvent.keyDown(listbox, { key: 'ArrowDown', code: 40, charCode: 40 });
       expect(document.activeElement).toBe(options[1]);
-      fireEvent.keyDown(listbox, {key: 'ArrowDown', code: 40, charCode: 40});
+      fireEvent.keyDown(listbox, { key: 'ArrowDown', code: 40, charCode: 40 });
       expect(document.activeElement).toBe(options[3]);
-      fireEvent.keyDown(listbox, {key: 'ArrowUp', code: 38, charCode: 38});
+      fireEvent.keyDown(listbox, { key: 'ArrowUp', code: 38, charCode: 38 });
       expect(document.activeElement).toBe(options[1]);
-      fireEvent.keyDown(listbox, {key: 'ArrowUp', code: 38, charCode: 38});
+      fireEvent.keyDown(listbox, { key: 'ArrowUp', code: 38, charCode: 38 });
       expect(document.activeElement).toBe(options[0]);
     });
   });
 
   describe('supports multi selection', function () {
     it('supports selecting multiple items', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'multiple'});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'multiple' });
       let listbox = tree.getByRole('listbox');
       expect(listbox).toHaveAttribute('aria-multiselectable', 'true');
 
@@ -332,18 +346,18 @@ describe('ListBox', function () {
       let firstItem = options[3];
       triggerPress(firstItem);
       expect(firstItem).toHaveAttribute('aria-selected', 'true');
-      let checkmark = within(firstItem).getByRole('img', {hidden: true});
+      let checkmark = within(firstItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Select a different menu item
       let secondItem = options[1];
       triggerPress(secondItem);
       expect(secondItem).toHaveAttribute('aria-selected', 'true');
-      checkmark = within(secondItem).getByRole('img', {hidden: true});
+      checkmark = within(secondItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Make sure there are multiple checkmark in the entire menu
-      checkmarks = tree.getAllByRole('img', {hidden: true});
+      checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(2);
 
       expect(onSelectionChange).toBeCalledTimes(2);
@@ -352,12 +366,12 @@ describe('ListBox', function () {
     });
 
     it('supports multiple defaultSelectedKeys (uncontrolled)', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'multiple', defaultSelectedKeys: ['Foo', 'Bar']});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'multiple', defaultSelectedKeys: ['Foo', 'Bar'] });
       let listbox = tree.getByRole('listbox');
       expect(listbox).toHaveAttribute('aria-multiselectable', 'true');
 
       // Make sure two items are checked by default
-      let checkmarks = tree.getAllByRole('img', {hidden: true});
+      let checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(2);
 
       let options = within(listbox).getAllByRole('option');
@@ -370,20 +384,20 @@ describe('ListBox', function () {
       expect(itemText).toBeTruthy();
       itemText = within(secondItem).getByText('Bar');
       expect(itemText).toBeTruthy();
-      let checkmark = within(firstItem).getByRole('img', {hidden: true});
+      let checkmark = within(firstItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
-      checkmark = within(secondItem).getByRole('img', {hidden: true});
+      checkmark = within(secondItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Select a different menu item
       let thirdItem = options[4];
       triggerPress(thirdItem);
       expect(thirdItem).toHaveAttribute('aria-selected', 'true');
-      checkmark = within(thirdItem).getByRole('img', {hidden: true});
+      checkmark = within(thirdItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Make sure there are now three checkmarks
-      checkmarks = tree.getAllByRole('img', {hidden: true});
+      checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(3);
 
       expect(onSelectionChange).toBeCalledTimes(1);
@@ -393,12 +407,12 @@ describe('ListBox', function () {
     });
 
     it('supports multiple selectedKeys (controlled)', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'multiple', selectedKeys: ['Foo', 'Bar']});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'multiple', selectedKeys: ['Foo', 'Bar'] });
       let listbox = tree.getByRole('listbox');
       expect(listbox).toHaveAttribute('aria-multiselectable', 'true');
 
       // Make sure two items are checked by default
-      let checkmarks = tree.getAllByRole('img', {hidden: true});
+      let checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(2);
 
       let options = within(listbox).getAllByRole('option');
@@ -411,20 +425,20 @@ describe('ListBox', function () {
       expect(itemText).toBeTruthy();
       itemText = within(secondItem).getByText('Bar');
       expect(itemText).toBeTruthy();
-      let checkmark = within(firstItem).getByRole('img', {hidden: true});
+      let checkmark = within(firstItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
-      checkmark = within(secondItem).getByRole('img', {hidden: true});
+      checkmark = within(secondItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Select a different menu item
       let thirdItem = options[4];
       triggerPress(thirdItem);
       expect(thirdItem).toHaveAttribute('aria-selected', 'false');
-      checkmark = within(thirdItem).queryByRole('img', {hidden: true});
+      checkmark = within(thirdItem).queryByRole('img', { hidden: true });
       expect(checkmark).toBeNull();
 
       // Make sure there are still two checkmarks
-      checkmarks = tree.getAllByRole('img', {hidden: true});
+      checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(2);
 
       expect(onSelectionChange).toBeCalledTimes(1);
@@ -432,12 +446,12 @@ describe('ListBox', function () {
     });
 
     it('supports deselection', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'multiple', defaultSelectedKeys: ['Foo', 'Bar']});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'multiple', defaultSelectedKeys: ['Foo', 'Bar'] });
       let listbox = tree.getByRole('listbox');
       expect(listbox).toHaveAttribute('aria-multiselectable', 'true');
 
       // Make sure two items are checked by default
-      let checkmarks = tree.getAllByRole('img', {hidden: true});
+      let checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(2);
 
       let options = within(listbox).getAllByRole('option');
@@ -450,19 +464,19 @@ describe('ListBox', function () {
       expect(itemText).toBeTruthy();
       itemText = within(secondItem).getByText('Bar');
       expect(itemText).toBeTruthy();
-      let checkmark = within(firstItem).getByRole('img', {hidden: true});
+      let checkmark = within(firstItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
-      checkmark = within(secondItem).getByRole('img', {hidden: true});
+      checkmark = within(secondItem).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Deselect the first item
       triggerPress(firstItem);
       expect(firstItem).toHaveAttribute('aria-selected', 'false');
-      checkmark = within(firstItem).queryByRole('img', {hidden: true});
+      checkmark = within(firstItem).queryByRole('img', { hidden: true });
       expect(checkmark).toBeNull();
 
       // Make sure there only a single checkmark now
-      checkmarks = tree.getAllByRole('img', {hidden: true});
+      checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(1);
 
       expect(onSelectionChange).toBeCalledTimes(1);
@@ -470,7 +484,7 @@ describe('ListBox', function () {
     });
 
     it('supports disabledKeys', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'multiple', defaultSelectedKeys: ['Foo', 'Bar'], disabledKeys: ['Baz']});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'multiple', defaultSelectedKeys: ['Foo', 'Bar'], disabledKeys: ['Baz'] });
       let listbox = tree.getByRole('listbox');
       expect(listbox).toHaveAttribute('aria-multiselectable', 'true');
 
@@ -483,7 +497,7 @@ describe('ListBox', function () {
       expect(disabledItem).toHaveAttribute('aria-disabled', 'true');
 
       // Make sure that only two items are checked still
-      let checkmarks = tree.getAllByRole('img', {hidden: true});
+      let checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(2);
 
       expect(onSelectionChange).toBeCalledTimes(0);
@@ -492,7 +506,7 @@ describe('ListBox', function () {
 
   describe('supports no selection', function () {
     it('prevents selection of any items', function () {
-      let tree = renderComponent({onSelectionChange, selectionMode: 'none'});
+      let tree = renderComponent({ onSelectionChange, selectionMode: 'none' });
       let listbox = tree.getByRole('listbox');
 
       // Make sure nothing is checked by default
@@ -505,8 +519,8 @@ describe('ListBox', function () {
       let secondItem = options[4];
       let thirdItem = options[1];
       triggerPress(firstItem);
-      fireEvent.keyDown(secondItem, {key: ' ', code: 32, charCode: 32});
-      fireEvent.keyDown(thirdItem, {key: 'Enter', code: 13, charCode: 13});
+      fireEvent.keyDown(secondItem, { key: ' ', code: 32, charCode: 32 });
+      fireEvent.keyDown(thirdItem, { key: 'Enter', code: 13, charCode: 13 });
       expect(firstItem).not.toHaveAttribute('aria-selected', 'true');
       expect(secondItem).not.toHaveAttribute('aria-selected', 'true');
       expect(thirdItem).not.toHaveAttribute('aria-selected', 'true');
@@ -520,97 +534,97 @@ describe('ListBox', function () {
 
   describe('supports type to select', function () {
     it('supports focusing items by typing letters in rapid succession', function () {
-      let tree = renderComponent({autoFocus: 'first'});
+      let tree = renderComponent({ autoFocus: 'first' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'B'});
+      fireEvent.keyDown(listbox, { key: 'B' });
       expect(document.activeElement).toBe(options[1]);
 
-      fireEvent.keyDown(listbox, {key: 'L'});
+      fireEvent.keyDown(listbox, { key: 'L' });
       expect(document.activeElement).toBe(options[3]);
 
-      fireEvent.keyDown(listbox, {key: 'E'});
+      fireEvent.keyDown(listbox, { key: 'E' });
       expect(document.activeElement).toBe(options[4]);
     });
 
     it('supports the space character in a search', function () {
-      let tree = renderComponent({autoFocus: 'first'});
+      let tree = renderComponent({ autoFocus: 'first' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'F'});
+      fireEvent.keyDown(listbox, { key: 'F' });
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'O'});
+      fireEvent.keyDown(listbox, { key: 'O' });
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'O'});
+      fireEvent.keyDown(listbox, { key: 'O' });
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: ' '});
+      fireEvent.keyDown(listbox, { key: ' ' });
       expect(document.activeElement).toBe(options[5]);
 
-      fireEvent.keyDown(listbox, {key: 'B'});
+      fireEvent.keyDown(listbox, { key: 'B' });
       expect(document.activeElement).toBe(options[5]);
 
-      fireEvent.keyDown(listbox, {key: 'A'});
+      fireEvent.keyDown(listbox, { key: 'A' });
       expect(document.activeElement).toBe(options[5]);
 
-      fireEvent.keyDown(listbox, {key: 'Z'});
+      fireEvent.keyDown(listbox, { key: 'Z' });
       expect(document.activeElement).toBe(options[6]);
     });
 
     it('supports item selection using the Spacebar after search times out', function () {
-      let tree = renderComponent({autoFocus: 'first', onSelectionChange, selectionMode: 'single'});
+      let tree = renderComponent({ autoFocus: 'first', onSelectionChange, selectionMode: 'single' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'F'});
+      fireEvent.keyDown(listbox, { key: 'F' });
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'O'});
+      fireEvent.keyDown(listbox, { key: 'O' });
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'O'});
+      fireEvent.keyDown(listbox, { key: 'O' });
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: ' '});
+      fireEvent.keyDown(listbox, { key: ' ' });
       expect(document.activeElement).toBe(options[5]);
 
       // Verify no selection was made
       expect(document.activeElement).toHaveAttribute('aria-selected', 'false');
 
       // Verify there are no checkmarks on the active element
-      let checkmark = within(document.activeElement).queryByRole('img', {hidden: true});
+      let checkmark = within(document.activeElement).queryByRole('img', { hidden: true });
       expect(checkmark).toBeFalsy();
 
       // Verify there are no checkmarks in the entire listbox
-      let checkmarks = tree.queryAllByRole('img', {hidden: true});
+      let checkmarks = tree.queryAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(0);
 
       // Verify onSelectionChange was not called
       expect(onSelectionChange).toBeCalledTimes(0);
 
       // Continue the search
-      fireEvent.keyDown(listbox, {key: 'B'});
+      fireEvent.keyDown(listbox, { key: 'B' });
       expect(document.activeElement).toBe(options[5]);
 
       // Advance the timers so we can select using the Spacebar
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
-      fireEvent.keyDown(document.activeElement, {key: ' ', code: 32, charCode: 32});
+      fireEvent.keyDown(document.activeElement, { key: ' ', code: 32, charCode: 32 });
 
       // Verify the selection
       expect(document.activeElement).toHaveAttribute('aria-selected', 'true');
-      checkmark = within(document.activeElement).getByRole('img', {hidden: true});
+      checkmark = within(document.activeElement).getByRole('img', { hidden: true });
       expect(checkmark).toBeTruthy();
 
       // Verify there is only a single checkmark in the entire listbox
-      checkmarks = tree.getAllByRole('img', {hidden: true});
+      checkmarks = tree.getAllByRole('img', { hidden: true });
       expect(checkmarks.length).toBe(1);
 
       // Verify onSelectionChange is called
@@ -619,34 +633,34 @@ describe('ListBox', function () {
     });
 
     it('resets the search text after a timeout', function () {
-      let tree = renderComponent({autoFocus: 'first'});
+      let tree = renderComponent({ autoFocus: 'first' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'B'});
+      fireEvent.keyDown(listbox, { key: 'B' });
       expect(document.activeElement).toBe(options[1]);
 
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
-      fireEvent.keyDown(listbox, {key: 'B'});
+      fireEvent.keyDown(listbox, { key: 'B' });
       expect(document.activeElement).toBe(options[1]);
     });
 
     it('wraps around when no items past the current one match', function () {
-      let tree = renderComponent({autoFocus: 'first'});
+      let tree = renderComponent({ autoFocus: 'first' });
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
       expect(document.activeElement).toBe(options[0]);
 
-      fireEvent.keyDown(listbox, {key: 'B'});
-      fireEvent.keyDown(listbox, {key: 'L'});
-      fireEvent.keyDown(listbox, {key: 'E'});
+      fireEvent.keyDown(listbox, { key: 'B' });
+      fireEvent.keyDown(listbox, { key: 'L' });
+      fireEvent.keyDown(listbox, { key: 'E' });
       expect(document.activeElement).toBe(options[4]);
 
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
-      fireEvent.keyDown(listbox, {key: 'B'});
+      fireEvent.keyDown(listbox, { key: 'B' });
       expect(document.activeElement).toBe(options[4]);
     });
   });
@@ -676,14 +690,14 @@ describe('ListBox', function () {
   });
 
   it('supports aria-label', function () {
-    let tree = renderComponent({'aria-label': 'Test'});
+    let tree = renderComponent({ 'aria-label': 'Test' });
     let listbox = tree.getByRole('listbox');
     expect(listbox).toHaveAttribute('aria-label', 'Test');
   });
 
   it('warns user if no aria-label is provided', () => {
-    let spyWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    renderComponent({'aria-labelledby': undefined});
+    let spyWarn = jest.spyOn(console, 'warn').mockImplementation(() => { });
+    renderComponent({ 'aria-labelledby': undefined });
     expect(spyWarn).toHaveBeenCalledWith('If you do not provide a visible label, you must specify an aria-label or aria-labelledby attribute for accessibility');
   });
 
@@ -710,14 +724,14 @@ describe('ListBox', function () {
   });
 
   it('supports custom data attributes', function () {
-    let tree = renderComponent({'data-testid': 'test'});
+    let tree = renderComponent({ 'data-testid': 'test' });
     let listbox = tree.getByRole('listbox');
     expect(listbox).toHaveAttribute('data-testid', 'test');
   });
 
   it('items support custom data attributes', function () {
-    let items = [{key: 0, name: 'Foo'}, {key: 1, name: 'Bar'}];
-    let {getByRole} = render(
+    let items = [{ key: 0, name: 'Foo' }, { key: 1, name: 'Bar' }];
+    let { getByRole } = render(
       <Provider theme={theme}>
         <ListBox aria-label="listbox" items={items}>
           {item => <Item data-name={item.name}>{item.name}</Item>}
@@ -731,8 +745,8 @@ describe('ListBox', function () {
   });
 
   it('item id should not get overridden by custom id', function () {
-    let items = [{key: 0, name: 'Foo'}, {key: 1, name: 'Bar'}];
-    let {getByRole} = render(
+    let items = [{ key: 0, name: 'Foo' }, { key: 1, name: 'Bar' }];
+    let { getByRole } = render(
       <Provider theme={theme}>
         <ListBox aria-label="listbox" items={items}>
           {item => <Item id={item.name}>{item.name}</Item>}
@@ -747,7 +761,7 @@ describe('ListBox', function () {
 
   describe('async loading', function () {
     it('should display a spinner while loading', async function () {
-      let {getByRole, rerender} = render(
+      let { getByRole, rerender } = render(
         <Provider theme={theme}>
           <ListBox aria-label="listbox" items={[]} isLoading>
             {item => <Item>{item.name}</Item>}
@@ -779,8 +793,8 @@ describe('ListBox', function () {
     });
 
     it('should display a spinner inside the listbox when loading more', function () {
-      let items = [{name: 'Foo'}, {name: 'Bar'}];
-      let {getByRole, rerender} = render(
+      let items = [{ name: 'Foo' }, { name: 'Bar' }];
+      let { getByRole, rerender } = render(
         <Provider theme={theme}>
           <ListBox aria-label="listbox" items={items} isLoading>
             {item => <Item key={item.name}>{item.name}</Item>}
@@ -821,11 +835,11 @@ describe('ListBox', function () {
       let onLoadMore = jest.fn();
       let items = [];
       for (let i = 1; i <= 100; i++) {
-        items.push({name: 'Test ' + i});
+        items.push({ name: 'Test ' + i });
       }
       // total height if all are rendered would be about 100 * 48px = 4800px
 
-      let {getByRole} = render(
+      let { getByRole } = render(
         <Provider theme={theme}>
           <ListBox aria-label="listbox" items={items} maxHeight={maxHeight} onLoadMore={onLoadMore}>
             {item => <Item key={item.name}>{item.name}</Item>}
@@ -864,10 +878,10 @@ describe('ListBox', function () {
       let onLoadMore = jest.fn();
       let items = [];
       for (let i = 1; i <= 5; i++) {
-        items.push({name: 'Test ' + i});
+        items.push({ name: 'Test ' + i });
       }
 
-      let {getByRole} = render(
+      let { getByRole } = render(
         <Provider theme={theme}>
           <ListBox aria-label="listbox" items={items} maxHeight={maxHeight} onLoadMore={onLoadMore}>
             {item => <Item key={item.name}>{item.name}</Item>}
@@ -890,15 +904,15 @@ describe('ListBox', function () {
       act(() => jest.runAllTimers());
       let listbox = tree.getByRole('listbox');
       let options = within(listbox).getAllByRole('option');
-      act(() => {options[2].focus();});
+      act(() => { options[2].focus(); });
       expect(options[2]).toHaveAttribute('aria-posinset', '3');
       expect(options[2]).toHaveAttribute('aria-setsize', '6');
       expect(document.activeElement).toBe(options[2]);
-      fireEvent.keyDown(document.activeElement, {key: ' ', code: 32, charCode: 32});
+      fireEvent.keyDown(document.activeElement, { key: ' ', code: 32, charCode: 32 });
       expect(document.activeElement).toHaveAttribute('aria-selected', 'true');
       let removeButton = tree.getByRole('button');
       expect(removeButton).toBeInTheDocument();
-      act(() => {removeButton.focus();});
+      act(() => { removeButton.focus(); });
       expect(document.activeElement).toBe(removeButton);
       triggerPress(removeButton);
       act(() => jest.runAllTimers());
@@ -915,16 +929,16 @@ describe('ListBox', function () {
       expect(document.activeElement).toBe(options[2]);
       expect(options[2]).toHaveAttribute('aria-posinset', '3');
       expect(options[2]).toHaveAttribute('aria-setsize', '5');
-      act(() => {options[1].focus();});
-      fireEvent.keyDown(document.activeElement, {key: ' ', code: 32, charCode: 32});
+      act(() => { options[1].focus(); });
+      fireEvent.keyDown(document.activeElement, { key: ' ', code: 32, charCode: 32 });
       expect(document.activeElement).toHaveAttribute('aria-selected', 'true');
-      act(() => {options[0].focus();});
-      fireEvent.keyDown(document.activeElement, {key: ' ', code: 32, charCode: 32});
+      act(() => { options[0].focus(); });
+      fireEvent.keyDown(document.activeElement, { key: ' ', code: 32, charCode: 32 });
       expect(document.activeElement).toHaveAttribute('aria-selected', 'true');
-      act(() => {options[0].focus();});
+      act(() => { options[0].focus(); });
       removeButton = tree.getByRole('button');
       expect(removeButton).toBeInTheDocument();
-      act(() => {removeButton.focus();});
+      act(() => { removeButton.focus(); });
       expect(document.activeElement).toBe(removeButton);
       triggerPress(removeButton);
       act(() => jest.runAllTimers());
