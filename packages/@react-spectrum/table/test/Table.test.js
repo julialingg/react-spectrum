@@ -12,29 +12,29 @@
 
 jest.mock('@react-aria/live-announcer');
 jest.mock('@react-aria/utils/src/scrollIntoView');
-import {act, fireEvent, installPointerEvent, mockClickDefault, pointerMap, render as renderComponent, within} from '@react-spectrum/test-utils-internal';
-import {ActionButton, Button} from '@react-spectrum/button';
+import { act, fireEvent, installPointerEvent, mockClickDefault, pointerMap, render as renderComponent, within } from '@react-spectrum/test-utils-internal';
+import { ActionButton, Button } from '@react-spectrum/button';
 import Add from '@spectrum-icons/workflow/Add';
-import {announce} from '@react-aria/live-announcer';
-import {ButtonGroup} from '@react-spectrum/buttongroup';
-import {Cell, Column, Row, TableBody, TableHeader, TableView} from '../';
-import {composeStories} from '@storybook/react';
-import {Content} from '@react-spectrum/view';
-import {CRUDExample} from '../stories/CRUDExample';
-import {Dialog, DialogTrigger} from '@react-spectrum/dialog';
-import {Divider} from '@react-spectrum/divider';
-import {enableTableNestedRows} from '@react-stately/flags';
-import {getFocusableTreeWalker} from '@react-aria/focus';
-import {Heading} from '@react-spectrum/text';
-import {Item, Picker} from '@react-spectrum/picker';
-import {Link} from '@react-spectrum/link';
-import {Provider} from '@react-spectrum/provider';
+import { announce } from '@react-aria/live-announcer';
+import { ButtonGroup } from '@react-spectrum/buttongroup';
+import { Cell, Column, Row, TableBody, TableHeader, TableView } from '../';
+import { composeStories } from '@storybook/react';
+import { Content } from '@react-spectrum/view';
+import { CRUDExample } from '../stories/CRUDExample';
+import { Dialog, DialogTrigger } from '@react-spectrum/dialog';
+import { Divider } from '@react-spectrum/divider';
+import { enableTableNestedRows } from '@react-stately/flags';
+import { getFocusableTreeWalker } from '@react-aria/focus';
+import { Heading } from '@react-spectrum/text';
+import { Item, Picker } from '@react-spectrum/picker';
+import { Link } from '@react-spectrum/link';
+import { Provider } from '@react-spectrum/provider';
 import React from 'react';
-import {scrollIntoView} from '@react-aria/utils';
+import { scrollIntoView } from '@react-aria/utils';
 import * as stories from '../stories/Table.stories';
-import {Switch} from '@react-spectrum/switch';
-import {TextField} from '@react-spectrum/textfield';
-import {theme} from '@react-spectrum/theme-default';
+import { Switch } from '@react-spectrum/switch';
+import { TextField } from '@react-spectrum/textfield';
+import { theme } from '@react-spectrum/theme-default';
 import userEvent from '@testing-library/user-event';
 
 let {
@@ -47,47 +47,53 @@ let {
 
 
 let columns = [
-  {name: 'Foo', key: 'foo'},
-  {name: 'Bar', key: 'bar'},
-  {name: 'Baz', key: 'baz'}
+  { name: 'Foo', key: 'foo' },
+  { name: 'Bar', key: 'bar' },
+  { name: 'Baz', key: 'baz' }
 ];
 
 let nestedColumns = [
-  {name: 'Test', key: 'test'},
-  {name: 'Tiered One Header', key: 'tier1', children: [
-    {name: 'Tier Two Header A', key: 'tier2a', children: [
-      {name: 'Foo', key: 'foo'},
-      {name: 'Bar', key: 'bar'}
-    ]},
-    {name: 'Yay', key: 'yay'},
-    {name: 'Tier Two Header B', key: 'tier2b', children: [
-      {name: 'Baz', key: 'baz'}
-    ]}
-  ]}
+  { name: 'Test', key: 'test' },
+  {
+    name: 'Tiered One Header', key: 'tier1', children: [
+      {
+        name: 'Tier Two Header A', key: 'tier2a', children: [
+          { name: 'Foo', key: 'foo' },
+          { name: 'Bar', key: 'bar' }
+        ]
+      },
+      { name: 'Yay', key: 'yay' },
+      {
+        name: 'Tier Two Header B', key: 'tier2b', children: [
+          { name: 'Baz', key: 'baz' }
+        ]
+      }
+    ]
+  }
 ];
 
 let items = [
-  {test: 'Test 1', foo: 'Foo 1', bar: 'Bar 1', yay: 'Yay 1', baz: 'Baz 1'},
-  {test: 'Test 2', foo: 'Foo 2', bar: 'Bar 2', yay: 'Yay 2', baz: 'Baz 2'}
+  { test: 'Test 1', foo: 'Foo 1', bar: 'Bar 1', yay: 'Yay 1', baz: 'Baz 1' },
+  { test: 'Test 2', foo: 'Foo 2', bar: 'Bar 2', yay: 'Yay 2', baz: 'Baz 2' }
 ];
 
 let itemsWithFalsyId = [
-  {test: 'Test 1', foo: 'Foo 1', bar: 'Bar 1', yay: 'Yay 1', baz: 'Baz 1', id: 0},
-  {test: 'Test 2', foo: 'Foo 2', bar: 'Bar 2', yay: 'Yay 2', baz: 'Baz 2', id: 1}
+  { test: 'Test 1', foo: 'Foo 1', bar: 'Bar 1', yay: 'Yay 1', baz: 'Baz 1', id: 0 },
+  { test: 'Test 2', foo: 'Foo 2', bar: 'Bar 2', yay: 'Yay 2', baz: 'Baz 2', id: 1 }
 ];
 
 let manyItems = [];
 for (let i = 1; i <= 100; i++) {
-  manyItems.push({id: i, foo: 'Foo ' + i, bar: 'Bar ' + i, baz: 'Baz ' + i});
+  manyItems.push({ id: i, foo: 'Foo ' + i, bar: 'Bar ' + i, baz: 'Baz ' + i });
 }
 
 let manyColumns = [];
 for (let i = 1; i <= 100; i++) {
-  manyColumns.push({id: i, name: 'Column ' + i});
+  manyColumns.push({ id: i, name: 'Column ' + i });
 }
 
 function ExampleSortTable() {
-  let [sortDescriptor, setSortDescriptor] = React.useState({column: 'bar', direction: 'ascending'});
+  let [sortDescriptor, setSortDescriptor] = React.useState({ column: 'bar', direction: 'ascending' });
 
   return (
     <TableView aria-label="Table" sortDescriptor={sortDescriptor} onSortChange={setSortDescriptor}>
@@ -127,7 +133,7 @@ let defaultTable = (
 );
 
 function pointerEvent(type, opts) {
-  let evt = new Event(type, {bubbles: true, cancelable: true});
+  let evt = new Event(type, { bubbles: true, cancelable: true });
   Object.assign(evt, {
     ctrlKey: false,
     metaKey: false,
@@ -145,7 +151,7 @@ export let tableTests = () => {
   let user;
 
   beforeAll(function () {
-    user = userEvent.setup({delay: null, pointerMap});
+    user = userEvent.setup({ delay: null, pointerMap });
     offsetWidth = jest.spyOn(window.HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(() => 1000);
     offsetHeight = jest.spyOn(window.HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(() => 1000);
     jest.useFakeTimers();
@@ -157,7 +163,7 @@ export let tableTests = () => {
   });
 
   afterEach(() => {
-    act(() => {jest.runAllTimers();});
+    act(() => { jest.runAllTimers(); });
   });
 
   let render = (children, scale = 'medium') => {
@@ -167,7 +173,7 @@ export let tableTests = () => {
       </Provider>
     );
     // account for table column resizing to do initial pass due to relayout from useTableColumnResizeState render
-    act(() => {jest.runAllTimers();});
+    act(() => { jest.runAllTimers(); });
     return tree;
   };
 
@@ -177,7 +183,7 @@ export let tableTests = () => {
         {children}
       </Provider>
     );
-    act(() => {jest.runAllTimers();});
+    act(() => { jest.runAllTimers(); });
     return newTree;
   };
   // I'd use tree.getByRole(role, {name: text}) here, but it's unbearably slow.
@@ -192,10 +198,10 @@ export let tableTests = () => {
   };
 
   let focusCell = (tree, text) => act(() => getCell(tree, text).focus());
-  let moveFocus = (key, opts = {}) => {fireEvent.keyDown(document.activeElement, {key, ...opts});};
+  let moveFocus = (key, opts = {}) => { fireEvent.keyDown(document.activeElement, { key, ...opts }); };
 
   it('renders a static table', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table" data-testid="test">
         <TableHeader>
           <Column>Foo</Column>
@@ -278,7 +284,7 @@ export let tableTests = () => {
   });
 
   it('renders a static table with selection', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table" data-testid="test" selectionMode="multiple">
         <TableHeader>
           <Column>Foo</Column>
@@ -376,7 +382,7 @@ export let tableTests = () => {
   });
 
   it('accepts a UNSAFE_className', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table" data-testid="test" selectionMode="multiple" UNSAFE_className="test-class">
         <TableHeader>
           <Column>Foo</Column>
@@ -403,16 +409,16 @@ export let tableTests = () => {
   });
 
   it('renders a dynamic table', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table">
         <TableHeader columns={columns}>
           {column => <Column>{column.name}</Column>}
         </TableHeader>
         <TableBody items={items}>
           {item =>
-            (<Row key={item.foo}>
-              {key => <Cell>{item[key]}</Cell>}
-            </Row>)
+          (<Row key={item.foo}>
+            {key => <Cell>{item[key]}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -468,16 +474,16 @@ export let tableTests = () => {
   });
 
   it('renders a dynamic table with selection', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table" selectionMode="multiple">
         <TableHeader columns={columns}>
           {column => <Column>{column.name}</Column>}
         </TableHeader>
         <TableBody items={items}>
           {item =>
-            (<Row key={item.foo}>
-              {key => <Cell>{item[key]}</Cell>}
-            </Row>)
+          (<Row key={item.foo}>
+            {key => <Cell>{item[key]}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -551,16 +557,16 @@ export let tableTests = () => {
 
   it('renders contents even with falsy row ids', function () {
     // TODO: doesn't support empty string ids, fix for that to come
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table">
         <TableHeader columns={columns}>
           {column => <Column>{column.name}</Column>}
         </TableHeader>
         <TableBody items={itemsWithFalsyId}>
           {item =>
-            (<Row>
-              {key => <Cell>{item[key]}</Cell>}
-            </Row>)
+          (<Row>
+            {key => <Cell>{item[key]}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -589,7 +595,7 @@ export let tableTests = () => {
   });
 
   it('renders a static table with nested columns', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table" selectionMode="multiple">
         <TableHeader>
           <Column key="test">Test</Column>
@@ -696,7 +702,7 @@ export let tableTests = () => {
   });
 
   it('renders a dynamic table with nested columns', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table" selectionMode="multiple">
         <TableHeader columns={nestedColumns}>
           {column =>
@@ -705,9 +711,9 @@ export let tableTests = () => {
         </TableHeader>
         <TableBody items={items}>
           {item =>
-            (<Row key={item.foo}>
-              {key => <Cell>{item[key]}</Cell>}
-            </Row>)
+          (<Row key={item.foo}>
+            {key => <Cell>{item[key]}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -801,7 +807,7 @@ export let tableTests = () => {
   });
 
   it('renders a table with multiple row headers', function () {
-    let {getByRole} = render(
+    let { getByRole } = render(
       <TableView aria-label="Table" selectionMode="multiple">
         <TableHeader>
           <Column isRowHeader>First Name</Column>
@@ -865,15 +871,15 @@ export let tableTests = () => {
             </TableHeader>
             <TableBody items={items}>
               {item =>
-                (<Row key={item.foo}>
-                  {key => <Cell>{item[key]}</Cell>}
-                </Row>)
+              (<Row key={item.foo}>
+                {key => <Cell>{item[key]}</Cell>}
+              </Row>)
               }
             </TableBody>
           </TableView>
         </Provider>
       );
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       return tree;
     };
 
@@ -889,15 +895,15 @@ export let tableTests = () => {
             </TableHeader>
             <TableBody items={items}>
               {item =>
-                (<Row key={item.foo}>
-                  {key => <Cell>{item[key]}</Cell>}
-                </Row>)
+              (<Row key={item.foo}>
+                {key => <Cell>{item[key]}</Cell>}
+              </Row>)
               }
             </TableBody>
           </TableView>
         </Provider>
       );
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       return tree;
     };
 
@@ -910,9 +916,9 @@ export let tableTests = () => {
         </TableHeader>
         <TableBody items={manyItems}>
           {item =>
-            (<Row key={item.foo}>
-              {key => <Cell>{item[key]}</Cell>}
-            </Row>)
+          (<Row key={item.foo}>
+            {key => <Cell>{item[key]}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -927,9 +933,9 @@ export let tableTests = () => {
         </TableHeader>
         <TableBody items={manyItems}>
           {item =>
-            (<Row key={item.foo}>
-              {key => <Cell>{item.foo + ' ' + key}</Cell>}
-            </Row>)
+          (<Row key={item.foo}>
+            {key => <Cell>{item.foo + ' ' + key}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -966,14 +972,14 @@ export let tableTests = () => {
 
       it('should move focus from the row to the first cell with ArrowRight', function () {
         let tree = renderTable();
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
         moveFocus('ArrowRight');
         expect(document.activeElement).toBe(getCell(tree, 'Foo 1'));
       });
 
       it('should move focus from the row to the last cell with ArrowRight in RTL', function () {
         let tree = renderTable('ar-AE');
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
         moveFocus('ArrowRight');
         expect(document.activeElement).toBe(getCell(tree, 'Baz 1'));
       });
@@ -1021,7 +1027,7 @@ export let tableTests = () => {
       });
 
       it('should allow the user to focus disabled cells', function () {
-        let tree = renderTable('en-US', {disabledKeys: ['Foo 1']});
+        let tree = renderTable('en-US', { disabledKeys: ['Foo 1'] });
         focusCell(tree, 'Bar 1');
         moveFocus('ArrowRight');
         expect(document.activeElement).toBe(getCell(tree, 'Baz 1'));
@@ -1059,14 +1065,14 @@ export let tableTests = () => {
 
       it('should move focus from the row to the last cell with ArrowLeft', function () {
         let tree = renderTable();
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
         moveFocus('ArrowLeft');
         expect(document.activeElement).toBe(getCell(tree, 'Baz 1'));
       });
 
       it('should move focus from the row to the first cell with ArrowLeft in RTL', function () {
         let tree = renderTable('ar-AE');
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
         moveFocus('ArrowLeft');
         expect(document.activeElement).toBe(getCell(tree, 'Foo 1'));
       });
@@ -1114,7 +1120,7 @@ export let tableTests = () => {
       });
 
       it('should allow the user to focus disabled cells', function () {
-        let tree = renderTable('en-US', {disabledKeys: ['Foo 1']});
+        let tree = renderTable('en-US', { disabledKeys: ['Foo 1'] });
         focusCell(tree, 'Bar 1');
         moveFocus('ArrowLeft');
         expect(document.activeElement).toBe(getCell(tree, 'Foo 1'));
@@ -1131,7 +1137,7 @@ export let tableTests = () => {
 
       it('should move focus to the row above with ArrowUp', function () {
         let tree = renderTable();
-        act(() => {tree.getAllByRole('row')[2].focus();});
+        act(() => { tree.getAllByRole('row')[2].focus(); });
         moveFocus('ArrowUp');
         expect(document.activeElement).toBe(tree.getAllByRole('row')[1]);
       });
@@ -1145,7 +1151,7 @@ export let tableTests = () => {
 
       it('should move focus to the column header above the first row with ArrowUp', function () {
         let tree = renderTable();
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
         moveFocus('ArrowUp');
         expect(document.activeElement).toBe(getCell(tree, 'Foo'));
       });
@@ -1163,7 +1169,7 @@ export let tableTests = () => {
       });
 
       it('should allow the user to focus disabled rows', function () {
-        let tree = renderTable('en-US', {disabledKeys: ['Foo 1']});
+        let tree = renderTable('en-US', { disabledKeys: ['Foo 1'] });
         focusCell(tree, 'Bar 2');
         moveFocus('ArrowUp');
         expect(document.activeElement).toBe(getCell(tree, 'Bar 1'));
@@ -1180,7 +1186,7 @@ export let tableTests = () => {
 
       it('should move focus to the row below with ArrowDown', function () {
         let tree = renderTable();
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
         moveFocus('ArrowDown');
         expect(document.activeElement).toBe(tree.getAllByRole('row')[2]);
       });
@@ -1202,7 +1208,7 @@ export let tableTests = () => {
       });
 
       it('should allow the user to focus disabled cells', function () {
-        let tree = renderTable('en-US', {disabledKeys: ['Foo 2']});
+        let tree = renderTable('en-US', { disabledKeys: ['Foo 2'] });
         focusCell(tree, 'Bar 1');
         moveFocus('ArrowDown');
         expect(document.activeElement).toBe(getCell(tree, 'Bar 2'));
@@ -1220,13 +1226,13 @@ export let tableTests = () => {
       it('should focus the first cell in the first row with ctrl + Home', function () {
         let tree = renderTable();
         focusCell(tree, 'Bar 2');
-        moveFocus('Home', {ctrlKey: true});
+        moveFocus('Home', { ctrlKey: true });
         expect(document.activeElement).toBe(getCell(tree, 'Foo 1'));
       });
 
       it('should focus the first row with Home', function () {
         let tree = renderTable();
-        act(() => {tree.getAllByRole('row')[2].focus();});
+        act(() => { tree.getAllByRole('row')[2].focus(); });
         moveFocus('Home');
         expect(document.activeElement).toBe(tree.getAllByRole('row')[1]);
       });
@@ -1243,13 +1249,13 @@ export let tableTests = () => {
       it('should focus the last cell in the last row with ctrl + End', function () {
         let tree = renderTable();
         focusCell(tree, 'Bar 1');
-        moveFocus('End', {ctrlKey: true});
+        moveFocus('End', { ctrlKey: true });
         expect(document.activeElement).toBe(getCell(tree, 'Baz 2'));
       });
 
       it('should focus the last row with End', function () {
         let tree = renderTable();
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
         moveFocus('End');
         expect(document.activeElement).toBe(tree.getAllByRole('row')[2]);
       });
@@ -1273,17 +1279,17 @@ export let tableTests = () => {
 
       it('should focus the row a page below', function () {
         let tree = renderMany();
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
         moveFocus('PageDown');
-        expect(document.activeElement).toBe(tree.getByRole('row', {name: 'Foo 25'}));
+        expect(document.activeElement).toBe(tree.getByRole('row', { name: 'Foo 25' }));
         moveFocus('PageDown');
-        expect(document.activeElement).toBe(tree.getByRole('row', {name: 'Foo 49'}));
+        expect(document.activeElement).toBe(tree.getByRole('row', { name: 'Foo 49' }));
         moveFocus('PageDown');
-        expect(document.activeElement).toBe(tree.getByRole('row', {name: 'Foo 73'}));
+        expect(document.activeElement).toBe(tree.getByRole('row', { name: 'Foo 73' }));
         moveFocus('PageDown');
-        expect(document.activeElement).toBe(tree.getByRole('row', {name: 'Foo 97'}));
+        expect(document.activeElement).toBe(tree.getByRole('row', { name: 'Foo 97' }));
         moveFocus('PageDown');
-        expect(document.activeElement).toBe(tree.getByRole('row', {name: 'Foo 100'}));
+        expect(document.activeElement).toBe(tree.getByRole('row', { name: 'Foo 100' }));
       });
     });
 
@@ -1300,10 +1306,10 @@ export let tableTests = () => {
 
       it('should focus the row a page above', function () {
         let tree = renderMany();
-        act(() => {tree.getAllByRole('row')[25].focus();});
+        act(() => { tree.getAllByRole('row')[25].focus(); });
         moveFocus('PageUp');
         expect(document.activeElement).toBe(tree.getAllByRole('row')[1]);
-        act(() => {tree.getAllByRole('row')[12].focus();});
+        act(() => { tree.getAllByRole('row')[12].focus(); });
         moveFocus('PageUp');
         expect(document.activeElement).toBe(tree.getAllByRole('row')[1]);
       });
@@ -1369,7 +1375,7 @@ export let tableTests = () => {
 
       it('focuses row by typing letters in rapid succession', function () {
         let tree = renderTypeSelect();
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
 
         moveFocus('J');
         expect(document.activeElement).toBe(tree.getAllByRole('row')[2]);
@@ -1383,7 +1389,7 @@ export let tableTests = () => {
 
       it('matches row against all row header cells', function () {
         let tree = renderTypeSelect();
-        act(() => {tree.getAllByRole('row')[1].focus();});
+        act(() => { tree.getAllByRole('row')[1].focus(); });
 
         moveFocus('D');
         expect(document.activeElement).toBe(tree.getAllByRole('row')[3]);
@@ -1396,7 +1402,7 @@ export let tableTests = () => {
         moveFocus('J');
         expect(document.activeElement).toBe(getCell(tree, 'Julia'));
 
-        act(() => {jest.runAllTimers();});
+        act(() => { jest.runAllTimers(); });
 
         moveFocus('J');
         expect(document.activeElement).toBe(getCell(tree, 'Julia'));
@@ -1415,7 +1421,7 @@ export let tableTests = () => {
         moveFocus('h');
         expect(document.activeElement).toBe(getCell(tree, 'John'));
 
-        act(() => {jest.runAllTimers();});
+        act(() => { jest.runAllTimers(); });
 
         moveFocus('J');
         expect(document.activeElement).toBe(getCell(tree, 'John'));
@@ -1431,7 +1437,7 @@ export let tableTests = () => {
         moveFocus('J');
         expect(document.activeElement).toBe(getCell(tree, 'Julia'));
 
-        act(() => {jest.runAllTimers();});
+        act(() => { jest.runAllTimers(); });
 
         moveFocus('S');
         expect(document.activeElement).toBe(getCell(tree, 'Sam'));
@@ -1459,15 +1465,15 @@ export let tableTests = () => {
             jest.runAllTimers();
           });
           let textfield = tree.getByLabelText('Enter a J');
-          act(() => {textfield.focus();});
-          fireEvent.keyDown(textfield, {key: 'J'});
-          fireEvent.keyUp(textfield, {key: 'J'});
+          act(() => { textfield.focus(); });
+          fireEvent.keyDown(textfield, { key: 'J' });
+          fireEvent.keyUp(textfield, { key: 'J' });
           act(() => {
             jest.runAllTimers();
           });
           expect(document.activeElement).toBe(textfield);
-          fireEvent.keyDown(document.activeElement, {key: 'Escape'});
-          fireEvent.keyUp(document.activeElement, {key: 'Escape'});
+          fireEvent.keyDown(document.activeElement, { key: 'Escape' });
+          fireEvent.keyUp(document.activeElement, { key: 'Escape' });
           act(() => {
             jest.runAllTimers();
           });
@@ -1587,9 +1593,9 @@ export let tableTests = () => {
         act(() => before.focus());
 
         // Simulate tabbing to the first "tabbable" item inside the table
-        fireEvent.keyDown(before, {key: 'Tab'});
-        act(() => {within(table).getAllByRole('switch')[0].focus();});
-        fireEvent.keyUp(before, {key: 'Tab'});
+        fireEvent.keyDown(before, { key: 'Tab' });
+        act(() => { within(table).getAllByRole('switch')[0].focus(); });
+        fireEvent.keyUp(before, { key: 'Tab' });
 
         expect(document.activeElement).toBe(within(table).getAllByRole('row')[1]);
       });
@@ -1605,9 +1611,9 @@ export let tableTests = () => {
 
         // Simulate tabbing to the last "tabbable" item inside the table
         act(() => {
-          fireEvent.keyDown(after, {key: 'Tab', shiftKey: true});
+          fireEvent.keyDown(after, { key: 'Tab', shiftKey: true });
           within(table).getAllByRole('link')[1].focus();
-          fireEvent.keyUp(after, {key: 'Tab', shiftKey: true});
+          fireEvent.keyUp(after, { key: 'Tab', shiftKey: true });
         });
 
         expect(document.activeElement).toBe(within(table).getAllByRole('row')[2]);
@@ -1628,9 +1634,9 @@ export let tableTests = () => {
         act(() => before.focus());
 
         // Simulate tabbing to the first "tabbable" item inside the table
-        fireEvent.keyDown(before, {key: 'Tab'});
-        act(() => {within(table).getAllByRole('switch')[0].focus();});
-        fireEvent.keyUp(before, {key: 'Tab'});
+        fireEvent.keyDown(before, { key: 'Tab' });
+        act(() => { within(table).getAllByRole('switch')[0].focus(); });
+        fireEvent.keyUp(before, { key: 'Tab' });
 
         expect(document.activeElement).toBe(baz1);
       });
@@ -1650,9 +1656,9 @@ export let tableTests = () => {
         act(() => after.focus());
 
         // Simulate tabbing to the last "tabbable" item inside the table
-        fireEvent.keyDown(after, {key: 'Tab'});
-        act(() => {within(table).getAllByRole('link')[1].focus();});
-        fireEvent.keyUp(after, {key: 'Tab'});
+        fireEvent.keyDown(after, { key: 'Tab' });
+        act(() => { within(table).getAllByRole('link')[1].focus(); });
+        fireEvent.keyUp(after, { key: 'Tab' });
 
         expect(document.activeElement).toBe(baz1);
       });
@@ -1677,11 +1683,11 @@ export let tableTests = () => {
         expect(document.activeElement).toBe(tree.getAllByRole('switch')[1]);
 
         // Simulate tabbing within the table
-        fireEvent.keyDown(document.activeElement, {key: 'Tab'});
-        let walker = getFocusableTreeWalker(document.body, {tabbable: true});
+        fireEvent.keyDown(document.activeElement, { key: 'Tab' });
+        let walker = getFocusableTreeWalker(document.body, { tabbable: true });
         walker.currentNode = document.activeElement;
-        act(() => {walker.nextNode().focus();});
-        fireEvent.keyUp(document.activeElement, {key: 'Tab'});
+        act(() => { walker.nextNode().focus(); });
+        fireEvent.keyUp(document.activeElement, { key: 'Tab' });
 
         let after = tree.getByTestId('after');
         expect(document.activeElement).toBe(after);
@@ -1695,11 +1701,11 @@ export let tableTests = () => {
 
         // Simulate tabbing within the table
         act(() => {
-          fireEvent.keyDown(document.activeElement, {key: 'Tab'});
-          let walker = getFocusableTreeWalker(document.body, {tabbable: true});
+          fireEvent.keyDown(document.activeElement, { key: 'Tab' });
+          let walker = getFocusableTreeWalker(document.body, { tabbable: true });
           walker.currentNode = document.activeElement;
           walker.nextNode().focus();
-          fireEvent.keyUp(document.activeElement, {key: 'Tab'});
+          fireEvent.keyUp(document.activeElement, { key: 'Tab' });
         });
 
         let after = tree.getByTestId('after');
@@ -1713,11 +1719,11 @@ export let tableTests = () => {
         expect(document.activeElement).toBe(tree.getAllByRole('switch')[1]);
 
         // Simulate shift tabbing within the table
-        fireEvent.keyDown(document.activeElement, {key: 'Tab', shiftKey: true});
-        let walker = getFocusableTreeWalker(document.body, {tabbable: true});
+        fireEvent.keyDown(document.activeElement, { key: 'Tab', shiftKey: true });
+        let walker = getFocusableTreeWalker(document.body, { tabbable: true });
         walker.currentNode = document.activeElement;
-        act(() => {walker.previousNode().focus();});
-        fireEvent.keyUp(document.activeElement, {key: 'Tab', shiftKey: true});
+        act(() => { walker.previousNode().focus(); });
+        fireEvent.keyUp(document.activeElement, { key: 'Tab', shiftKey: true });
 
         let before = tree.getByTestId('before');
         expect(document.activeElement).toBe(before);
@@ -1730,19 +1736,19 @@ export let tableTests = () => {
         await user.tab();
         expect(document.activeElement).toBe(rows[1]);
 
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowLeft'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowLeft'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowLeft' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowLeft' });
         expect(document.activeElement).toBe(within(rows[1]).getByRole('button'));
 
-        fireEvent.keyDown(document.activeElement, {key: 'Enter'});
-        fireEvent.keyUp(document.activeElement, {key: 'Enter'});
-        act(() => {jest.runAllTimers();});
+        fireEvent.keyDown(document.activeElement, { key: 'Enter' });
+        fireEvent.keyUp(document.activeElement, { key: 'Enter' });
+        act(() => { jest.runAllTimers(); });
 
         rows = tree.getAllByRole('row');
         expect(document.activeElement).toBe(within(rows[1]).getByRole('button'));
 
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowUp'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowUp'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowUp' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowUp' });
 
         rows = tree.getAllByRole('row');
         expect(document.activeElement).toBe(within(rows[0]).getAllByRole('columnheader')[4]);
@@ -1755,23 +1761,23 @@ export let tableTests = () => {
         await user.tab();
         expect(document.activeElement).toBe(rows[1]);
 
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowLeft'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowLeft'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowLeft' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowLeft' });
         expect(document.activeElement).toBe(within(rows[1]).getByRole('button'));
 
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowDown'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowDown'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowDown' });
         expect(document.activeElement).toBe(within(rows[2]).getByRole('button'));
 
-        fireEvent.keyDown(document.activeElement, {key: 'Enter'});
-        fireEvent.keyUp(document.activeElement, {key: 'Enter'});
-        act(() => {jest.runAllTimers();});
+        fireEvent.keyDown(document.activeElement, { key: 'Enter' });
+        fireEvent.keyUp(document.activeElement, { key: 'Enter' });
+        act(() => { jest.runAllTimers(); });
 
         rows = tree.getAllByRole('row');
         expect(document.activeElement).toBe(within(rows[1]).getByRole('button'));
 
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowUp'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowUp'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowUp' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowUp' });
 
         rows = tree.getAllByRole('row');
         expect(document.activeElement).toBe(within(rows[0]).getAllByRole('columnheader')[4]);
@@ -1787,9 +1793,9 @@ export let tableTests = () => {
             </TableHeader>
             <TableBody items={items}>
               {item =>
-                (<Row key={item.foo}>
-                  {key => <Cell>{item[key]}</Cell>}
-                </Row>)
+              (<Row key={item.foo}>
+                {key => <Cell>{item[key]}</Cell>}
+              </Row>)
               }
             </TableBody>
           </TableView>
@@ -1898,9 +1904,9 @@ export let tableTests = () => {
         </TableHeader>
         <TableBody items={items}>
           {item =>
-            (<Row key={item.foo}>
-              {key => <Cell>{item[key]}</Cell>}
-            </Row>)
+          (<Row key={item.foo}>
+            {key => <Cell>{item[key]}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -1929,15 +1935,15 @@ export let tableTests = () => {
     };
 
     let pressWithKeyboard = (element, key = ' ') => {
-      fireEvent.keyDown(element, {key});
-      act(() => {element.focus();});
-      fireEvent.keyUp(element, {key});
+      fireEvent.keyDown(element, { key });
+      act(() => { element.focus(); });
+      fireEvent.keyUp(element, { key });
     };
 
     describe('row selection', function () {
       it('should select a row from checkbox', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
@@ -1950,7 +1956,7 @@ export let tableTests = () => {
 
       it('should select a row by pressing on a cell', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
@@ -1963,11 +1969,11 @@ export let tableTests = () => {
 
       it('should select a row by pressing the Space key on a row', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        fireEvent.keyDown(row, {key: ' '});
+        fireEvent.keyDown(row, { key: ' ' });
 
         checkSelection(onSelectionChange, ['Foo 1']);
         expect(row).toHaveAttribute('aria-selected', 'true');
@@ -1976,11 +1982,11 @@ export let tableTests = () => {
 
       it('should select a row by pressing the Enter key on a row', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        fireEvent.keyDown(row, {key: 'Enter'});
+        fireEvent.keyDown(row, { key: 'Enter' });
 
         checkSelection(onSelectionChange, ['Foo 1']);
         expect(row).toHaveAttribute('aria-selected', 'true');
@@ -1989,11 +1995,11 @@ export let tableTests = () => {
 
       it('should select a row by pressing the Space key on a cell', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: ' '});
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: ' ' });
 
         checkSelection(onSelectionChange, ['Foo 1']);
         expect(row).toHaveAttribute('aria-selected', 'true');
@@ -2002,11 +2008,11 @@ export let tableTests = () => {
 
       it('should select a row by pressing the Enter key on a cell', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: 'Enter'});
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: 'Enter' });
 
         checkSelection(onSelectionChange, ['Foo 1']);
         expect(row).toHaveAttribute('aria-selected', 'true');
@@ -2015,7 +2021,7 @@ export let tableTests = () => {
 
       it('should support selecting multiple with a pointer', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2049,7 +2055,7 @@ export let tableTests = () => {
 
       it('should support selecting multiple with the Space key', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2083,7 +2089,7 @@ export let tableTests = () => {
 
       it('should not allow selection of a disabled row via checkbox click', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, disabledKeys: ['Foo 1']});
+        let tree = renderTable({ onSelectionChange, disabledKeys: ['Foo 1'] });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
@@ -2098,7 +2104,7 @@ export let tableTests = () => {
 
       it('should not allow selection of a disabled row by pressing on a cell', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, disabledKeys: ['Foo 1']});
+        let tree = renderTable({ onSelectionChange, disabledKeys: ['Foo 1'] });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
@@ -2113,12 +2119,12 @@ export let tableTests = () => {
 
       it('should not allow the user to select a disabled row via keyboard', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, disabledKeys: ['Foo 1']});
+        let tree = renderTable({ onSelectionChange, disabledKeys: ['Foo 1'] });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        act(() => {fireEvent.keyDown(row, {key: ' '});});
-        act(() => {fireEvent.keyDown(row, {key: 'Enter'});});
+        act(() => { fireEvent.keyDown(row, { key: ' ' }); });
+        act(() => { fireEvent.keyDown(row, { key: 'Enter' }); });
 
         expect(onSelectionChange).not.toHaveBeenCalled();
         expect(row).toHaveAttribute('aria-selected', 'false');
@@ -2136,9 +2142,9 @@ export let tableTests = () => {
               </TableHeader>
               <TableBody items={items}>
                 {item =>
-                  (<Row key={item.foo}>
-                    {key => <Cell><Link><a href={`https://example.com/?id=${item.id}`} target="_blank">{item[key]}</a></Link></Cell>}
-                  </Row>)
+                (<Row key={item.foo}>
+                  {key => <Cell><Link><a href={`https://example.com/?id=${item.id}`} target="_blank">{item[key]}</a></Link></Cell>}
+                </Row>)
                 }
               </TableBody>
             </TableView>
@@ -2152,8 +2158,8 @@ export let tableTests = () => {
 
           act(() => {
             link.focus();
-            fireEvent.keyDown(link, {key: ' '});
-            fireEvent.keyUp(link, {key: ' '});
+            fireEvent.keyDown(link, { key: ' ' });
+            fireEvent.keyUp(link, { key: ' ' });
             jest.runAllTimers();
           });
 
@@ -2162,8 +2168,8 @@ export let tableTests = () => {
 
           act(() => {
             link.focus();
-            fireEvent.keyDown(link, {key: ' '});
-            fireEvent.keyUp(link, {key: ' '});
+            fireEvent.keyDown(link, { key: ' ' });
+            fireEvent.keyUp(link, { key: ' ' });
             jest.runAllTimers();
           });
 
@@ -2179,7 +2185,7 @@ export let tableTests = () => {
     describe('range selection', function () {
       it('should support selecting a range with a pointer', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2203,7 +2209,7 @@ export let tableTests = () => {
 
       it('should anchor range selections with a pointer', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2240,7 +2246,7 @@ export let tableTests = () => {
 
       it('should extend a selection with Shift + ArrowDown', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2249,7 +2255,7 @@ export let tableTests = () => {
         pressWithKeyboard(getCell(tree, 'Baz 10'));
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: 'ArrowDown', shiftKey: true});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: 'ArrowDown', shiftKey: true });
 
         checkSelection(onSelectionChange, ['Foo 10', 'Foo 11']);
         checkRowSelection(rows.slice(1, 10), false);
@@ -2259,7 +2265,7 @@ export let tableTests = () => {
 
       it('should extend a selection with Shift + ArrowUp', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2268,7 +2274,7 @@ export let tableTests = () => {
         pressWithKeyboard(getCell(tree, 'Baz 10'));
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: 'ArrowUp', shiftKey: true});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: 'ArrowUp', shiftKey: true });
 
         checkSelection(onSelectionChange, ['Foo 9', 'Foo 10']);
         checkRowSelection(rows.slice(1, 9), false);
@@ -2278,7 +2284,7 @@ export let tableTests = () => {
 
       it('should extend a selection with Ctrl + Shift + Home', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2287,7 +2293,7 @@ export let tableTests = () => {
         pressWithKeyboard(getCell(tree, 'Baz 10'));
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: 'Home', shiftKey: true, ctrlKey: true});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: 'Home', shiftKey: true, ctrlKey: true });
 
         checkSelection(onSelectionChange, [
           'Foo 1', 'Foo 2', 'Foo 3', 'Foo 4', 'Foo 5',
@@ -2300,7 +2306,7 @@ export let tableTests = () => {
 
       it('should extend a selection with Ctrl + Shift + End', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2309,7 +2315,7 @@ export let tableTests = () => {
         pressWithKeyboard(getCell(tree, 'Baz 10'));
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: 'End', shiftKey: true, ctrlKey: true});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: 'End', shiftKey: true, ctrlKey: true });
 
         let expected = [];
         for (let i = 10; i <= 100; i++) {
@@ -2321,7 +2327,7 @@ export let tableTests = () => {
 
       it('should extend a selection with Shift + PageDown', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2330,7 +2336,7 @@ export let tableTests = () => {
         pressWithKeyboard(getCell(tree, 'Baz 10'));
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: 'PageDown', shiftKey: true});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: 'PageDown', shiftKey: true });
 
         let expected = [];
         for (let i = 10; i <= 34; i++) {
@@ -2342,7 +2348,7 @@ export let tableTests = () => {
 
       it('should extend a selection with Shift + PageUp', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2351,7 +2357,7 @@ export let tableTests = () => {
         pressWithKeyboard(getCell(tree, 'Baz 10'));
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: 'PageUp', shiftKey: true});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: 'PageUp', shiftKey: true });
 
         checkSelection(onSelectionChange, [
           'Foo 1', 'Foo 2', 'Foo 3', 'Foo 4', 'Foo 5',
@@ -2364,7 +2370,7 @@ export let tableTests = () => {
 
       it('should not include disabled rows within a range selection', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, disabledKeys: ['Foo 3', 'Foo 16']});
+        let tree = renderTable({ onSelectionChange, disabledKeys: ['Foo 3', 'Foo 16'] });
         checkSelectAll(tree, 'unchecked');
 
         let rows = tree.getAllByRole('row');
@@ -2392,7 +2398,7 @@ export let tableTests = () => {
     describe('select all', function () {
       it('should support selecting all via the checkbox', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2409,21 +2415,21 @@ export let tableTests = () => {
 
       it('should support selecting all via ctrl + A', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
         let rows = tree.getAllByRole('row');
         checkRowSelection(rows.slice(1), false);
 
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: 'a', ctrlKey: true});
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: 'a', ctrlKey: true });
 
         expect(onSelectionChange).toHaveBeenCalledTimes(1);
         expect(onSelectionChange.mock.calls[0][0]).toEqual('all');
         checkRowSelection(rows.slice(1), true);
         checkSelectAll(tree, 'checked');
 
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: 'a', ctrlKey: true});
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: 'a', ctrlKey: true });
 
         expect(onSelectionChange).toHaveBeenCalledTimes(1);
         expect(onSelectionChange.mock.calls[0][0]).toEqual('all');
@@ -2433,7 +2439,7 @@ export let tableTests = () => {
 
       it('should deselect an item after selecting all', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2458,7 +2464,7 @@ export let tableTests = () => {
 
       it('should shift click on an item after selecting all', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2480,7 +2486,7 @@ export let tableTests = () => {
 
       it('should support clearing selection via checkbox', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2501,7 +2507,7 @@ export let tableTests = () => {
 
       it('should support clearing selection via Escape', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2511,7 +2517,7 @@ export let tableTests = () => {
         checkSelectAll(tree, 'indeterminate');
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: 'Escape'});
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: 'Escape' });
 
         expect(onSelectionChange).toHaveBeenCalledTimes(1);
         expect(new Set(onSelectionChange.mock.calls[0][0])).toEqual(new Set());
@@ -2521,10 +2527,10 @@ export let tableTests = () => {
 
       it('should only call onSelectionChange if there are selections to clear', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: 'Escape'});
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: 'Escape' });
         expect(onSelectionChange).not.toHaveBeenCalled();
 
         await user.click(tree.getByLabelText('Select All'));
@@ -2532,13 +2538,13 @@ export let tableTests = () => {
         expect(onSelectionChange).toHaveBeenLastCalledWith('all');
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: 'Escape'});
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: 'Escape' });
         expect(new Set(onSelectionChange.mock.calls[0][0])).toEqual(new Set());
       });
 
       it('should automatically select new items when select all is active', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2549,8 +2555,8 @@ export let tableTests = () => {
         checkSelectAll(tree, 'checked');
         checkRowSelection(rows.slice(1), true);
 
-        rerender(tree, renderJSX({onSelectionChange}, [
-          {foo: 'Foo 0', bar: 'Bar 0', baz: 'Baz 0'},
+        rerender(tree, renderJSX({ onSelectionChange }, [
+          { foo: 'Foo 0', bar: 'Bar 0', baz: 'Baz 0' },
           ...manyItems
         ]));
 
@@ -2562,7 +2568,7 @@ export let tableTests = () => {
 
       it('manually selecting all should not auto select new items', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange}, items);
+        let tree = renderTable({ onSelectionChange }, items);
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2575,8 +2581,8 @@ export let tableTests = () => {
         await user.click(rows[2]);
         checkSelectAll(tree, 'checked');
 
-        rerender(tree, renderJSX({onSelectionChange}, [
-          {foo: 'Foo 0', bar: 'Bar 0', baz: 'Baz 0'},
+        rerender(tree, renderJSX({ onSelectionChange }, [
+          { foo: 'Foo 0', bar: 'Bar 0', baz: 'Baz 0' },
           ...items
         ]));
 
@@ -2591,7 +2597,7 @@ export let tableTests = () => {
 
       it('should not included disabled rows when selecting all', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, disabledKeys: ['Foo 3']});
+        let tree = renderTable({ onSelectionChange, disabledKeys: ['Foo 3'] });
 
         checkSelectAll(tree, 'unchecked');
 
@@ -2611,7 +2617,7 @@ export let tableTests = () => {
     describe('annoucements', function () {
       it('should announce the selected or deselected row', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         await user.click(row);
@@ -2623,7 +2629,7 @@ export let tableTests = () => {
 
       it('should announce the row and number of selected items when there are more than one', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let rows = tree.getAllByRole('row');
         await user.click(rows[1]);
@@ -2637,7 +2643,7 @@ export let tableTests = () => {
 
       it('should announce only the number of selected items when multiple are selected at once', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let rows = tree.getAllByRole('row');
         await user.click(rows[1]);
@@ -2653,7 +2659,7 @@ export let tableTests = () => {
 
       it('should announce select all', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         await user.click(tree.getByLabelText('Select All'));
         expect(announce).toHaveBeenLastCalledWith('All items selected.');
@@ -2793,10 +2799,10 @@ export let tableTests = () => {
       it('should trigger onAction when clicking rows with the mouse', async function () {
         let onSelectionChange = jest.fn();
         let onAction = jest.fn();
-        let tree = renderTable({onSelectionChange, onAction});
+        let tree = renderTable({ onSelectionChange, onAction });
 
         let rows = tree.getAllByRole('row');
-        await user.click(getCell(tree, 'Baz 10'), {pointerType: 'mouse'});
+        await user.click(getCell(tree, 'Baz 10'), { pointerType: 'mouse' });
         expect(onSelectionChange).not.toHaveBeenCalled();
         expect(onAction).toHaveBeenCalledTimes(1);
         expect(onAction).toHaveBeenLastCalledWith('Foo 10');
@@ -2807,7 +2813,7 @@ export let tableTests = () => {
         expect(onSelectionChange).toHaveBeenCalledTimes(1);
         checkRowSelection([rows[1]], true);
 
-        await user.click(getCell(tree, 'Baz 10'), {pointerType: 'mouse'});
+        await user.click(getCell(tree, 'Baz 10'), { pointerType: 'mouse' });
         expect(onSelectionChange).toHaveBeenCalledTimes(2);
         checkRowSelection([rows[1], rows[10]], true);
       });
@@ -2815,21 +2821,21 @@ export let tableTests = () => {
       it('should trigger onAction when clicking rows with touch', async function () {
         let onSelectionChange = jest.fn();
         let onAction = jest.fn();
-        let tree = renderTable({onSelectionChange, onAction});
+        let tree = renderTable({ onSelectionChange, onAction });
 
         let rows = tree.getAllByRole('row');
-        await user.click(getCell(tree, 'Baz 10'), {pointerType: 'touch'});
+        await user.click(getCell(tree, 'Baz 10'), { pointerType: 'touch' });
         expect(onSelectionChange).not.toHaveBeenCalled();
         expect(onAction).toHaveBeenCalledTimes(1);
         expect(onAction).toHaveBeenLastCalledWith('Foo 10');
         checkRowSelection(rows.slice(1), false);
 
         let checkbox = within(rows[1]).getByRole('checkbox');
-        await user.click(checkbox, {pointerType: 'touch'});
+        await user.click(checkbox, { pointerType: 'touch' });
         expect(onSelectionChange).toHaveBeenCalledTimes(1);
         checkRowSelection([rows[1]], true);
 
-        await user.click(getCell(tree, 'Baz 10'), {pointerType: 'touch'});
+        await user.click(getCell(tree, 'Baz 10'), { pointerType: 'touch' });
         expect(onSelectionChange).toHaveBeenCalledTimes(2);
         checkRowSelection([rows[1], rows[10]], true);
       });
@@ -2839,13 +2845,13 @@ export let tableTests = () => {
         it('should support long press to enter selection mode on touch', async function () {
           let onSelectionChange = jest.fn();
           let onAction = jest.fn();
-          let tree = renderTable({onSelectionChange, onAction});
+          let tree = renderTable({ onSelectionChange, onAction });
           act(() => jest.runAllTimers());
-          await user.pointer({target: document.body, keys: '[TouchA]'});
+          await user.pointer({ target: document.body, keys: '[TouchA]' });
 
           let cellBaz5 = getCell(tree, 'Foo 5');
 
-          fireEvent.pointerDown(cellBaz5, {pointerType: 'touch'});
+          fireEvent.pointerDown(cellBaz5, { pointerType: 'touch' });
           expect(onSelectionChange).not.toHaveBeenCalled();
           expect(onAction).not.toHaveBeenCalled();
 
@@ -2854,17 +2860,17 @@ export let tableTests = () => {
           checkSelection(onSelectionChange, ['Foo 5']);
           expect(onAction).not.toHaveBeenCalled();
 
-          fireEvent.pointerUp(cellBaz5, {pointerType: 'touch'});
-          fireEvent.click(cellBaz5, {pointerType: 'touch'});
+          fireEvent.pointerUp(cellBaz5, { pointerType: 'touch' });
+          fireEvent.click(cellBaz5, { pointerType: 'touch' });
           onSelectionChange.mockReset();
 
-          await user.pointer({target: getCell(tree, 'Foo 10'), keys: '[TouchA]'});
+          await user.pointer({ target: getCell(tree, 'Foo 10'), keys: '[TouchA]' });
           checkSelection(onSelectionChange, ['Foo 5', 'Foo 10']);
 
           // Deselect all to exit selection mode
-          await user.pointer({target: getCell(tree, 'Foo 10'), keys: '[TouchA]'});
+          await user.pointer({ target: getCell(tree, 'Foo 10'), keys: '[TouchA]' });
           onSelectionChange.mockReset();
-          await user.pointer({target: cellBaz5, keys: '[TouchA]'});
+          await user.pointer({ target: cellBaz5, keys: '[TouchA]' });
 
           act(() => jest.runAllTimers());
           checkSelection(onSelectionChange, []);
@@ -2875,19 +2881,19 @@ export let tableTests = () => {
       it('should trigger onAction when pressing Enter', function () {
         let onSelectionChange = jest.fn();
         let onAction = jest.fn();
-        let tree = renderTable({onSelectionChange, onAction});
+        let tree = renderTable({ onSelectionChange, onAction });
         let rows = tree.getAllByRole('row');
 
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: 'Enter'});
-        fireEvent.keyUp(getCell(tree, 'Baz 10'), {key: 'Enter'});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: 'Enter' });
+        fireEvent.keyUp(getCell(tree, 'Baz 10'), { key: 'Enter' });
         expect(onSelectionChange).not.toHaveBeenCalled();
         expect(onAction).toHaveBeenCalledTimes(1);
         expect(onAction).toHaveBeenLastCalledWith('Foo 10');
         checkRowSelection(rows.slice(1), false);
 
         onAction.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: ' '});
-        fireEvent.keyUp(getCell(tree, 'Baz 10'), {key: ' '});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: ' ' });
+        fireEvent.keyUp(getCell(tree, 'Baz 10'), { key: ' ' });
         expect(onSelectionChange).toHaveBeenCalledTimes(1);
         expect(onAction).not.toHaveBeenCalled();
         checkRowSelection([rows[10]], true);
@@ -2897,7 +2903,7 @@ export let tableTests = () => {
     describe('selectionStyle highlight', function () {
       it('will replace the current selection with the new selection', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight'});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight' });
 
         expect(tree.queryByLabelText('Select All')).toBeNull();
 
@@ -2947,13 +2953,13 @@ export let tableTests = () => {
       it('will add to the current selection if the command key is pressed', async function () {
         let uaMock = jest.spyOn(navigator, 'platform', 'get').mockImplementation(() => 'Mac');
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight'});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight' });
 
         expect(tree.queryByLabelText('Select All')).toBeNull();
 
         let rows = tree.getAllByRole('row');
         checkRowSelection(rows.slice(1), false);
-        await user.click(getCell(tree, 'Baz 10'), {pointerType: 'mouse'});
+        await user.click(getCell(tree, 'Baz 10'), { pointerType: 'mouse' });
 
         onSelectionChange.mockReset();
         await user.keyboard('[ShiftLeft>]');
@@ -2984,15 +2990,15 @@ export let tableTests = () => {
 
         it('should toggle selection with touch', async function () {
           let onSelectionChange = jest.fn();
-          let tree = renderTable({onSelectionChange, selectionStyle: 'highlight'});
+          let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight' });
 
           expect(tree.queryByLabelText('Select All')).toBeNull();
 
-          await user.pointer({target: getCell(tree, 'Baz 5'), keys: '[TouchA]'});
+          await user.pointer({ target: getCell(tree, 'Baz 5'), keys: '[TouchA]' });
           expect(announce).toHaveBeenLastCalledWith('Foo 5 selected.');
           expect(announce).toHaveBeenCalledTimes(1);
           onSelectionChange.mockReset();
-          await user.pointer({target: getCell(tree, 'Foo 10'), keys: '[TouchA]'});
+          await user.pointer({ target: getCell(tree, 'Foo 10'), keys: '[TouchA]' });
           expect(announce).toHaveBeenLastCalledWith('Foo 10 selected. 2 items selected.');
           expect(announce).toHaveBeenCalledTimes(2);
 
@@ -3002,9 +3008,9 @@ export let tableTests = () => {
         it('should support single tap to perform onAction with touch', async function () {
           let onSelectionChange = jest.fn();
           let onAction = jest.fn();
-          let tree = renderTable({onSelectionChange, selectionStyle: 'highlight', onAction});
+          let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight', onAction });
 
-          await user.pointer({target: getCell(tree, 'Baz 5'), keys: '[TouchA]'});
+          await user.pointer({ target: getCell(tree, 'Baz 5'), keys: '[TouchA]' });
           expect(announce).not.toHaveBeenCalled();
           expect(onSelectionChange).not.toHaveBeenCalled();
           expect(onAction).toHaveBeenCalledTimes(1);
@@ -3015,7 +3021,7 @@ export let tableTests = () => {
       it('should support double click to perform onAction with mouse', async function () {
         let onSelectionChange = jest.fn();
         let onAction = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight', onAction});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight', onAction });
 
         await user.click(getCell(tree, 'Baz 5'));
         expect(announce).toHaveBeenLastCalledWith('Foo 5 selected.');
@@ -3036,12 +3042,12 @@ export let tableTests = () => {
         installPointerEvent();
         it('should support single tap to perform row selection with screen reader if onAction isn\'t provided', function () {
           let onSelectionChange = jest.fn();
-          let tree = renderTable({onSelectionChange, selectionStyle: 'highlight'});
+          let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight' });
 
           let cell = getCell(tree, 'Baz 5');
-          fireEvent(cell, pointerEvent('pointerdown', {width: 0, height: 0, pointerType: 'touch'}));
+          fireEvent(cell, pointerEvent('pointerdown', { width: 0, height: 0, pointerType: 'touch' }));
           fireEvent(cell, pointerEvent('mousedown', {}));
-          fireEvent(cell, pointerEvent('pointerup', {width: 0, height: 0, pointerType: 'touch'}));
+          fireEvent(cell, pointerEvent('pointerup', { width: 0, height: 0, pointerType: 'touch' }));
           fireEvent(cell, pointerEvent('mouseup', {}));
           fireEvent(cell, pointerEvent('click', {}));
           checkSelection(onSelectionChange, [
@@ -3066,7 +3072,7 @@ export let tableTests = () => {
             detail: 0,
             pointerType: 'mouse'
           }));
-          fireEvent.click(cell, {pointerType: 'mouse', width: 1, height: 1, detail: 1});
+          fireEvent.click(cell, { pointerType: 'mouse', width: 1, height: 1, detail: 1 });
           checkSelection(onSelectionChange, [
             'Foo 5', 'Foo 8'
           ]);
@@ -3090,7 +3096,7 @@ export let tableTests = () => {
             detail: 0,
             pointerType: 'mouse'
           }));
-          fireEvent.click(cell, {pointerType: 'mouse', width: 1, height: 1, detail: 1});
+          fireEvent.click(cell, { pointerType: 'mouse', width: 1, height: 1, detail: 1 });
           checkSelection(onSelectionChange, [
             'Foo 5', 'Foo 8', 'Foo 10'
           ]);
@@ -3099,9 +3105,9 @@ export let tableTests = () => {
         it('should support single tap to perform onAction with screen reader', function () {
           let onSelectionChange = jest.fn();
           let onAction = jest.fn();
-          let tree = renderTable({onSelectionChange, selectionStyle: 'highlight', onAction});
+          let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight', onAction });
 
-          fireEvent.click(getCell(tree, 'Baz 5'), {detail: 0});
+          fireEvent.click(getCell(tree, 'Baz 5'), { detail: 0 });
           expect(announce).not.toHaveBeenCalled();
           expect(onSelectionChange).not.toHaveBeenCalled();
           expect(onAction).toHaveBeenCalledTimes(1);
@@ -3109,9 +3115,9 @@ export let tableTests = () => {
 
           // Android TalkBack double tap test, virtual pointer event sets pointerType and onClick handles the rest
           let cell = getCell(tree, 'Foo 10');
-          fireEvent(cell, pointerEvent('pointerdown', {pointerId: 1, width: 1, height: 1, pressure: 0, detail: 0, pointerType: 'mouse'}));
-          fireEvent(cell, pointerEvent('pointerup', {pointerId: 1, width: 1, height: 1, pressure: 0, detail: 0, pointerType: 'mouse'}));
-          fireEvent.click(cell, {pointerType: 'mouse', width: 1, height: 1, detail: 1});
+          fireEvent(cell, pointerEvent('pointerdown', { pointerId: 1, width: 1, height: 1, pressure: 0, detail: 0, pointerType: 'mouse' }));
+          fireEvent(cell, pointerEvent('pointerup', { pointerId: 1, width: 1, height: 1, pressure: 0, detail: 0, pointerType: 'mouse' }));
+          fireEvent.click(cell, { pointerType: 'mouse', width: 1, height: 1, detail: 1 });
           expect(onSelectionChange).not.toHaveBeenCalled();
           expect(onAction).toHaveBeenCalledTimes(2);
           expect(onAction).toHaveBeenCalledWith('Foo 10');
@@ -3131,14 +3137,14 @@ export let tableTests = () => {
           it('should support long press to enter selection mode on touch', async function () {
             let onSelectionChange = jest.fn();
             let onAction = jest.fn();
-            let tree = renderTable({onSelectionChange, selectionStyle: 'highlight', onAction});
+            let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight', onAction });
 
             act(() => {
               jest.runAllTimers();
             });
             await user.click(document.body);
 
-            fireEvent.pointerDown(getCell(tree, 'Baz 5'), {pointerType: 'touch'});
+            fireEvent.pointerDown(getCell(tree, 'Baz 5'), { pointerType: 'touch' });
             let description = tree.getByText('Long press to enter selection mode.');
             expect(tree.getByRole('grid')).toHaveAttribute('aria-describedby', expect.stringContaining(description.id));
             expect(announce).not.toHaveBeenCalled();
@@ -3156,13 +3162,13 @@ export let tableTests = () => {
             expect(onAction).not.toHaveBeenCalled();
             expect(tree.queryByLabelText('Select All')).not.toBeNull();
 
-            fireEvent.pointerUp(getCell(tree, 'Baz 5'), {pointerType: 'touch'});
+            fireEvent.pointerUp(getCell(tree, 'Baz 5'), { pointerType: 'touch' });
             onSelectionChange.mockReset();
             act(() => {
               jest.runAllTimers();
             });
 
-            await user.click(getCell(tree, 'Foo 10'), {pointerType: 'touch'});
+            await user.click(getCell(tree, 'Foo 10'), { pointerType: 'touch' });
             act(() => {
               jest.runAllTimers();
             });
@@ -3171,7 +3177,7 @@ export let tableTests = () => {
             checkSelection(onSelectionChange, ['Foo 5', 'Foo 10']);
 
             // Deselect all to exit selection mode
-            await user.click(getCell(tree, 'Foo 10'), {pointerType: 'touch'});
+            await user.click(getCell(tree, 'Foo 10'), { pointerType: 'touch' });
             act(() => {
               jest.runAllTimers();
             });
@@ -3179,9 +3185,9 @@ export let tableTests = () => {
             expect(announce).toHaveBeenCalledTimes(3);
             onSelectionChange.mockReset();
 
-            fireEvent.pointerDown(getCell(tree, 'Baz 5'), {pointerType: 'touch'});
-            fireEvent.pointerUp(getCell(tree, 'Baz 5'), {pointerType: 'touch'});
-            fireEvent.click(getCell(tree, 'Baz 5'), {pointerType: 'touch'});
+            fireEvent.pointerDown(getCell(tree, 'Baz 5'), { pointerType: 'touch' });
+            fireEvent.pointerUp(getCell(tree, 'Baz 5'), { pointerType: 'touch' });
+            fireEvent.click(getCell(tree, 'Baz 5'), { pointerType: 'touch' });
             act(() => {
               jest.runAllTimers();
             });
@@ -3201,10 +3207,10 @@ export let tableTests = () => {
       it('should support Enter to perform onAction with keyboard', function () {
         let onSelectionChange = jest.fn();
         let onAction = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight', onAction});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight', onAction });
 
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: ' '});
-        fireEvent.keyUp(getCell(tree, 'Baz 10'), {key: ' '});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: ' ' });
+        fireEvent.keyUp(getCell(tree, 'Baz 10'), { key: ' ' });
         checkSelection(onSelectionChange, ['Foo 10']);
         // screen reader automatically handles this one
         expect(announce).not.toHaveBeenCalled();
@@ -3212,8 +3218,8 @@ export let tableTests = () => {
 
         announce.mockReset();
         onSelectionChange.mockReset();
-        fireEvent.keyDown(getCell(tree, 'Baz 5'), {key: 'Enter'});
-        fireEvent.keyUp(getCell(tree, 'Baz 5'), {key: 'Enter'});
+        fireEvent.keyDown(getCell(tree, 'Baz 5'), { key: 'Enter' });
+        fireEvent.keyUp(getCell(tree, 'Baz 5'), { key: 'Enter' });
         expect(onSelectionChange).not.toHaveBeenCalled();
         expect(announce).not.toHaveBeenCalled();
         expect(onAction).toHaveBeenCalledTimes(1);
@@ -3223,9 +3229,9 @@ export let tableTests = () => {
       it('should perform onAction on single click with selectionMode: none', async function () {
         let onSelectionChange = jest.fn();
         let onAction = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionMode: 'none', onAction});
+        let tree = renderTable({ onSelectionChange, selectionMode: 'none', onAction });
 
-        await user.click(getCell(tree, 'Baz 10'), {pointerType: 'mouse'});
+        await user.click(getCell(tree, 'Baz 10'), { pointerType: 'mouse' });
         expect(announce).not.toHaveBeenCalled();
         expect(onSelectionChange).not.toHaveBeenCalled();
         expect(onAction).toHaveBeenCalledTimes(1);
@@ -3234,90 +3240,90 @@ export let tableTests = () => {
 
       it('should move selection when using the arrow keys', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight'});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight' });
 
-        await user.click(getCell(tree, 'Baz 5'), {pointerType: 'mouse'});
+        await user.click(getCell(tree, 'Baz 5'), { pointerType: 'mouse' });
         expect(announce).toHaveBeenLastCalledWith('Foo 5 selected.');
         expect(announce).toHaveBeenCalledTimes(1);
         checkSelection(onSelectionChange, ['Foo 5']);
 
         announce.mockReset();
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowDown'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowDown'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowDown' });
         expect(announce).toHaveBeenCalledWith('Foo 6 selected.');
         checkSelection(onSelectionChange, ['Foo 6']);
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowUp'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowUp'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowUp' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowUp' });
         expect(announce).toHaveBeenCalledWith('Foo 5 selected.');
         checkSelection(onSelectionChange, ['Foo 5']);
 
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowDown', shiftKey: true});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowDown', shiftKey: true});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowDown', shiftKey: true });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowDown', shiftKey: true });
         expect(announce).toHaveBeenCalledWith('Foo 6 selected. 2 items selected.');
         checkSelection(onSelectionChange, ['Foo 5', 'Foo 6']);
       });
 
       it('should announce the new row when moving with the keyboard after multi select', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight'});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight' });
 
-        await user.click(getCell(tree, 'Baz 5'), {pointerType: 'mouse'});
+        await user.click(getCell(tree, 'Baz 5'), { pointerType: 'mouse' });
         expect(announce).toHaveBeenLastCalledWith('Foo 5 selected.');
         expect(announce).toHaveBeenCalledTimes(1);
         checkSelection(onSelectionChange, ['Foo 5']);
 
         announce.mockReset();
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowDown', shiftKey: true});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowDown', shiftKey: true});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowDown', shiftKey: true });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowDown', shiftKey: true });
         expect(announce).toHaveBeenCalledWith('Foo 6 selected. 2 items selected.');
         checkSelection(onSelectionChange, ['Foo 5', 'Foo 6']);
 
         announce.mockReset();
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowDown'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowDown'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowDown' });
         expect(announce).toHaveBeenCalledWith('Foo 7 selected. 1 item selected.');
         checkSelection(onSelectionChange, ['Foo 7']);
       });
 
       it('should support non-contiguous selection with the keyboard', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight'});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight' });
 
-        await user.click(getCell(tree, 'Baz 5'), {pointerType: 'mouse'});
+        await user.click(getCell(tree, 'Baz 5'), { pointerType: 'mouse' });
         expect(announce).toHaveBeenLastCalledWith('Foo 5 selected.');
         expect(announce).toHaveBeenCalledTimes(1);
         checkSelection(onSelectionChange, ['Foo 5']);
 
         announce.mockReset();
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowDown', ctrlKey: true});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowDown', ctrlKey: true});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowDown', ctrlKey: true });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowDown', ctrlKey: true });
         expect(announce).not.toHaveBeenCalled();
         expect(onSelectionChange).not.toHaveBeenCalled();
         expect(document.activeElement).toBe(getCell(tree, 'Baz 6').closest('[role="row"]'));
 
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowDown', ctrlKey: true});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowDown', ctrlKey: true});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowDown', ctrlKey: true });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowDown', ctrlKey: true });
         expect(announce).not.toHaveBeenCalled();
         expect(onSelectionChange).not.toHaveBeenCalled();
         expect(document.activeElement).toBe(getCell(tree, 'Baz 7').closest('[role="row"]'));
 
-        fireEvent.keyDown(document.activeElement, {key: ' ', ctrlKey: true});
-        fireEvent.keyUp(document.activeElement, {key: ' ', ctrlKey: true});
+        fireEvent.keyDown(document.activeElement, { key: ' ', ctrlKey: true });
+        fireEvent.keyUp(document.activeElement, { key: ' ', ctrlKey: true });
         expect(announce).toHaveBeenCalledWith('Foo 7 selected. 2 items selected.');
         expect(announce).toHaveBeenCalledTimes(1);
         checkSelection(onSelectionChange, ['Foo 5', 'Foo 7']);
 
         announce.mockReset();
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: ' '});
-        fireEvent.keyUp(document.activeElement, {key: ' '});
+        fireEvent.keyDown(document.activeElement, { key: ' ' });
+        fireEvent.keyUp(document.activeElement, { key: ' ' });
         expect(announce).toHaveBeenCalledWith('Foo 7 selected. 1 item selected.');
         expect(announce).toHaveBeenCalledTimes(1);
         checkSelection(onSelectionChange, ['Foo 7']);
@@ -3326,19 +3332,19 @@ export let tableTests = () => {
       it('should not call onSelectionChange when hitting Space/Enter on the currently selected row', function () {
         let onSelectionChange = jest.fn();
         let onAction = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight', onAction});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight', onAction });
 
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: ' '});
-        fireEvent.keyUp(getCell(tree, 'Baz 10'), {key: ' '});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: ' ' });
+        fireEvent.keyUp(getCell(tree, 'Baz 10'), { key: ' ' });
         checkSelection(onSelectionChange, ['Foo 10']);
         expect(onAction).not.toHaveBeenCalled();
 
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: ' '});
-        fireEvent.keyUp(getCell(tree, 'Baz 10'), {key: ' '});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: ' ' });
+        fireEvent.keyUp(getCell(tree, 'Baz 10'), { key: ' ' });
         expect(onSelectionChange).toHaveBeenCalledTimes(1);
 
-        fireEvent.keyDown(getCell(tree, 'Baz 10'), {key: 'Enter'});
-        fireEvent.keyUp(getCell(tree, 'Baz 10'), {key: 'Enter'});
+        fireEvent.keyDown(getCell(tree, 'Baz 10'), { key: 'Enter' });
+        fireEvent.keyUp(getCell(tree, 'Baz 10'), { key: 'Enter' });
         expect(onAction).toHaveBeenCalledTimes(1);
         expect(onAction).toHaveBeenCalledWith('Foo 10');
         expect(onSelectionChange).toHaveBeenCalledTimes(1);
@@ -3347,23 +3353,23 @@ export let tableTests = () => {
       it('should announce the current selection when moving from all to one item', async function () {
         let onSelectionChange = jest.fn();
         let onAction = jest.fn();
-        let tree = renderTable({onSelectionChange, selectionStyle: 'highlight', onAction});
-        await user.click(getCell(tree, 'Baz 5'), {pointerType: 'mouse'});
+        let tree = renderTable({ onSelectionChange, selectionStyle: 'highlight', onAction });
+        await user.click(getCell(tree, 'Baz 5'), { pointerType: 'mouse' });
         expect(announce).toHaveBeenLastCalledWith('Foo 5 selected.');
         expect(announce).toHaveBeenCalledTimes(1);
         checkSelection(onSelectionChange, ['Foo 5']);
 
         announce.mockReset();
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: 'a', ctrlKey: true});
-        fireEvent.keyUp(document.activeElement, {key: 'a', ctrlKey: true});
+        fireEvent.keyDown(document.activeElement, { key: 'a', ctrlKey: true });
+        fireEvent.keyUp(document.activeElement, { key: 'a', ctrlKey: true });
         expect(onSelectionChange.mock.calls[0][0]).toEqual('all');
         expect(announce).toHaveBeenCalledWith('All items selected.');
 
         announce.mockReset();
         onSelectionChange.mockReset();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowDown'});
-        fireEvent.keyUp(document.activeElement, {key: 'ArrowDown'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' });
+        fireEvent.keyUp(document.activeElement, { key: 'ArrowDown' });
         expect(announce).toHaveBeenCalledWith('Foo 6 selected. 1 item selected.');
         checkSelection(onSelectionChange, ['Foo 6']);
       });
@@ -3378,9 +3384,9 @@ export let tableTests = () => {
         </TableHeader>
         <TableBody items={items}>
           {item =>
-            (<Row key={item.foo}>
-              {key => <Cell>{item[key]}</Cell>}
-            </Row>)
+          (<Row key={item.foo}>
+            {key => <Cell>{item[key]}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -3401,16 +3407,16 @@ export let tableTests = () => {
 
     let pressWithKeyboard = (element, key = ' ') => {
       act(() => {
-        fireEvent.keyDown(element, {key});
+        fireEvent.keyDown(element, { key });
         element.focus();
-        fireEvent.keyUp(element, {key});
+        fireEvent.keyUp(element, { key });
       });
     };
 
     describe('row selection', function () {
       it('should select a row from checkbox', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
@@ -3422,7 +3428,7 @@ export let tableTests = () => {
 
       it('should select a row by pressing on a cell', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
@@ -3434,11 +3440,11 @@ export let tableTests = () => {
 
       it('should select a row by pressing the Space key on a row', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        act(() => {fireEvent.keyDown(row, {key: ' '});});
+        act(() => { fireEvent.keyDown(row, { key: ' ' }); });
 
         checkSelection(onSelectionChange, ['Foo 1']);
         expect(row).toHaveAttribute('aria-selected', 'true');
@@ -3446,11 +3452,11 @@ export let tableTests = () => {
 
       it('should select a row by pressing the Enter key on a row', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        act(() => {fireEvent.keyDown(row, {key: 'Enter'});});
+        act(() => { fireEvent.keyDown(row, { key: 'Enter' }); });
 
         checkSelection(onSelectionChange, ['Foo 1']);
         expect(row).toHaveAttribute('aria-selected', 'true');
@@ -3458,11 +3464,11 @@ export let tableTests = () => {
 
       it('should select a row by pressing the Space key on a cell', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        act(() => {fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: ' '});});
+        act(() => { fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: ' ' }); });
 
         checkSelection(onSelectionChange, ['Foo 1']);
         expect(row).toHaveAttribute('aria-selected', 'true');
@@ -3470,11 +3476,11 @@ export let tableTests = () => {
 
       it('should select a row by pressing the Enter key on a cell', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
-        act(() => {fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: 'Enter'});});
+        act(() => { fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: 'Enter' }); });
 
         checkSelection(onSelectionChange, ['Foo 1']);
         expect(row).toHaveAttribute('aria-selected', 'true');
@@ -3482,7 +3488,7 @@ export let tableTests = () => {
 
       it('will only select one if pointer is used to click on multiple rows', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let rows = tree.getAllByRole('row');
         checkRowSelection(rows.slice(1), false);
@@ -3513,7 +3519,7 @@ export let tableTests = () => {
 
       it('will only select one if pointer is used to click on multiple checkboxes', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let rows = tree.getAllByRole('row');
         checkRowSelection(rows.slice(1), false);
@@ -3544,7 +3550,7 @@ export let tableTests = () => {
 
       it('should support selecting single row only with the Space key', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
 
         let rows = tree.getAllByRole('row');
         checkRowSelection(rows.slice(1), false);
@@ -3575,15 +3581,15 @@ export let tableTests = () => {
 
       it('should not select a disabled row from checkbox or keyboard interaction', async function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange, disabledKeys: ['Foo 1']});
+        let tree = renderTable({ onSelectionChange, disabledKeys: ['Foo 1'] });
 
         let row = tree.getAllByRole('row')[1];
         expect(row).toHaveAttribute('aria-selected', 'false');
         await user.click(within(row).getByRole('checkbox'));
         await user.click(getCell(tree, 'Baz 1'));
-        fireEvent.keyDown(row, {key: ' '});
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: ' '});
-        fireEvent.keyDown(getCell(tree, 'Bar 1'), {key: 'Enter'});
+        fireEvent.keyDown(row, { key: ' ' });
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: ' ' });
+        fireEvent.keyDown(getCell(tree, 'Bar 1'), { key: 'Enter' });
 
         expect(row).toHaveAttribute('aria-selected', 'false');
         expect(onSelectionChange).not.toHaveBeenCalled();
@@ -3593,7 +3599,7 @@ export let tableTests = () => {
     describe('row selection column header', function () {
       it('should contain a hidden checkbox and VisuallyHidden accessible text', function () {
         let onSelectionChange = jest.fn();
-        let tree = renderTable({onSelectionChange});
+        let tree = renderTable({ onSelectionChange });
         let columnheader = tree.getAllByRole('columnheader')[0];
         let checkboxInput = columnheader.querySelector('input[type="checkbox"]');
         expect(columnheader).not.toHaveAttribute('aria-disabled', 'true');
@@ -3613,9 +3619,9 @@ export let tableTests = () => {
         </TableHeader>
         <TableBody items={items}>
           {item =>
-            (<Row key={item.foo}>
-              {key => <Cell>{item[key]}</Cell>}
-            </Row>)
+          (<Row key={item.foo}>
+            {key => <Cell>{item[key]}</Cell>}
+          </Row>)
           }
         </TableBody>
       </TableView>
@@ -3625,14 +3631,14 @@ export let tableTests = () => {
       let tree = render(<TableWithBreadcrumbs selectionMode="multiple" />);
 
       let row = tree.getAllByRole('row')[1];
-      fireEvent.mouseDown(row, {detail: 1});
+      fireEvent.mouseDown(row, { detail: 1 });
       expect(row.className.includes('is-active')).toBeTruthy();
       fireEvent.mouseEnter(row);
       expect(row.className.includes('is-hovered')).toBeTruthy();
 
       rerender(tree, <TableWithBreadcrumbs selectionMode="single" />);
       row = tree.getAllByRole('row')[1];
-      fireEvent.mouseDown(row, {detail: 1});
+      fireEvent.mouseDown(row, { detail: 1 });
       expect(row.className.includes('is-active')).toBeTruthy();
       fireEvent.mouseEnter(row);
       expect(row.className.includes('is-hovered')).toBeTruthy();
@@ -3642,7 +3648,7 @@ export let tableTests = () => {
       let tree = render(<TableWithBreadcrumbs selectionMode="none" />);
 
       let row = tree.getAllByRole('row')[1];
-      fireEvent.mouseDown(row, {detail: 1});
+      fireEvent.mouseDown(row, { detail: 1 });
       expect(row.className.includes('is-active')).toBeFalsy();
       fireEvent.mouseEnter(row);
       expect(row.className.includes('is-hovered')).toBeFalsy();
@@ -3661,7 +3667,7 @@ export let tableTests = () => {
 
       let button = tree.getByLabelText('Add item');
       await user.click(button);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
       let dialog = tree.getByRole('dialog');
       expect(dialog).toBeVisible();
@@ -3677,7 +3683,7 @@ export let tableTests = () => {
 
       let createButton = tree.getByText('Create');
       await user.click(createButton);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
       expect(dialog).not.toBeInTheDocument();
 
@@ -3706,28 +3712,28 @@ export let tableTests = () => {
       await user.tab();
       expect(document.activeElement).toBe(rows[1]);
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowLeft'});
-      fireEvent.keyUp(document.activeElement, {key: 'ArrowLeft'});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowLeft' });
+      fireEvent.keyUp(document.activeElement, { key: 'ArrowLeft' });
       expect(document.activeElement).toBe(within(rows[1]).getByRole('button'));
 
-      fireEvent.keyDown(document.activeElement, {key: 'Enter'});
-      fireEvent.keyUp(document.activeElement, {key: 'Enter'});
+      fireEvent.keyDown(document.activeElement, { key: 'Enter' });
+      fireEvent.keyUp(document.activeElement, { key: 'Enter' });
 
       let menu = tree.getByRole('menu');
       let menuItems = within(menu).getAllByRole('menuitem');
       expect(menuItems.length).toBe(2);
       expect(document.activeElement).toBe(menuItems[0]);
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowDown'});
-      fireEvent.keyUp(document.activeElement, {key: 'ArrowDown'});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' });
+      fireEvent.keyUp(document.activeElement, { key: 'ArrowDown' });
       expect(document.activeElement).toBe(menuItems[1]);
 
-      fireEvent.keyDown(document.activeElement, {key: 'Enter'});
-      fireEvent.keyUp(document.activeElement, {key: 'Enter'});
+      fireEvent.keyDown(document.activeElement, { key: 'Enter' });
+      fireEvent.keyUp(document.activeElement, { key: 'Enter' });
       expect(menu).not.toBeInTheDocument();
 
-      let dialog = tree.getByRole('alertdialog', {hidden: true});
-      let deleteButton = within(dialog).getByRole('button', {hidden: true});
+      let dialog = tree.getByRole('alertdialog', { hidden: true });
+      let deleteButton = within(dialog).getByRole('button', { hidden: true });
 
       await user.click(deleteButton);
       act(() => jest.runAllTimers());
@@ -3767,8 +3773,8 @@ export let tableTests = () => {
       act(() => jest.runAllTimers());
       expect(menu).not.toBeInTheDocument();
 
-      let dialog = tree.getByRole('alertdialog', {hidden: true});
-      let deleteButton = within(dialog).getByRole('button', {hidden: true});
+      let dialog = tree.getByRole('alertdialog', { hidden: true });
+      let deleteButton = within(dialog).getByRole('button', { hidden: true });
 
       await user.click(deleteButton);
       act(() => jest.runAllTimers());
@@ -3834,7 +3840,7 @@ export let tableTests = () => {
 
       let button = within(rows[2]).getByRole('button');
       await user.click(button);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
       let menu = tree.getByRole('menu');
       expect(document.activeElement).toBe(menu);
@@ -3843,7 +3849,7 @@ export let tableTests = () => {
       expect(menuItems.length).toBe(2);
 
       await user.click(menuItems[0]);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(menu).not.toBeInTheDocument();
 
       let dialog = tree.getByRole('dialog');
@@ -3856,8 +3862,8 @@ export let tableTests = () => {
       let saveButton = tree.getByText('Save');
       await user.click(saveButton);
 
-      act(() => {jest.runAllTimers();});
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
+      act(() => { jest.runAllTimers(); });
 
       expect(dialog).not.toBeInTheDocument();
 
@@ -3875,47 +3881,47 @@ export let tableTests = () => {
       expect(rows).toHaveLength(3);
 
       act(() => within(rows[1]).getAllByRole('gridcell').pop().focus());
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       let button = within(rows[1]).getByRole('button');
       expect(document.activeElement).toBe(button);
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowDown'});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' });
 
       expect(tree.queryByRole('menu')).toBeNull();
 
       expect(document.activeElement).toBe(within(rows[2]).getByRole('button'));
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowUp'});
-      fireEvent.keyUp(document.activeElement, {key: 'ArrowUp'});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowUp' });
+      fireEvent.keyUp(document.activeElement, { key: 'ArrowUp' });
 
       expect(tree.queryByRole('menu')).toBeNull();
 
       expect(document.activeElement).toBe(button);
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowDown', altKey: true});
-      fireEvent.keyUp(document.activeElement, {key: 'ArrowDown', altKey: true});
-      act(() => {jest.runAllTimers();});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowDown', altKey: true });
+      fireEvent.keyUp(document.activeElement, { key: 'ArrowDown', altKey: true });
+      act(() => { jest.runAllTimers(); });
 
       let menu = tree.getByRole('menu');
       expect(document.activeElement).toBe(within(menu).getAllByRole('menuitem')[0]);
 
-      fireEvent.keyDown(document.activeElement, {key: 'Enter'});
-      fireEvent.keyUp(document.activeElement, {key: 'Enter'});
-      act(() => {jest.runAllTimers();});
+      fireEvent.keyDown(document.activeElement, { key: 'Enter' });
+      fireEvent.keyUp(document.activeElement, { key: 'Enter' });
+      act(() => { jest.runAllTimers(); });
       await user.tab();
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       await user.tab();
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       await user.tab();
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       await user.tab();
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(document.activeElement).toBe(tree.getAllByRole('button')[1]);
 
-      fireEvent.keyDown(document.activeElement, {key: 'Enter'});
-      fireEvent.keyUp(document.activeElement, {key: 'Enter'});
-      act(() => {jest.runAllTimers();});
-      act(() => {jest.runAllTimers();});
+      fireEvent.keyDown(document.activeElement, { key: 'Enter' });
+      fireEvent.keyUp(document.activeElement, { key: 'Enter' });
+      act(() => { jest.runAllTimers(); });
+      act(() => { jest.runAllTimers(); });
 
       expect(document.activeElement).toBe(button);
     });
@@ -3928,10 +3934,10 @@ export let tableTests = () => {
       expect(rows).toHaveLength(3);
 
       act(() => within(rows[1]).getAllByRole('gridcell').pop().focus());
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(document.activeElement).toBe(within(rows[1]).getByRole('button'));
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowDown', altKey: true});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowDown', altKey: true });
 
       let menu = tree.getByRole('menu');
       expect(menu).toBeInTheDocument();
@@ -3946,10 +3952,10 @@ export let tableTests = () => {
       expect(rows).toHaveLength(3);
 
       act(() => within(rows[1]).getAllByRole('gridcell').pop().focus());
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(document.activeElement).toBe(within(rows[1]).getByRole('button'));
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowUp', altKey: true});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowUp', altKey: true });
 
       let menu = tree.getByRole('menu');
       expect(menu).toBeInTheDocument();
@@ -3964,22 +3970,22 @@ export let tableTests = () => {
       expect(rows).toHaveLength(3);
 
       act(() => within(rows[1]).getAllByRole('gridcell').pop().focus());
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(document.activeElement).toBe(within(rows[1]).getByRole('button'));
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowDown', altKey: true});
-      fireEvent.keyUp(document.activeElement, {key: 'ArrowDown', altKey: true});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowDown', altKey: true });
+      fireEvent.keyUp(document.activeElement, { key: 'ArrowDown', altKey: true });
 
       let menu = tree.getByRole('menu');
       expect(menu).toBeInTheDocument();
       expect(document.activeElement).toBe(within(menu).getAllByRole('menuitem')[0]);
 
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowDown'});
-      fireEvent.keyUp(document.activeElement, {key: 'ArrowDown'});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' });
+      fireEvent.keyUp(document.activeElement, { key: 'ArrowDown' });
       expect(document.activeElement).toBe(within(menu).getAllByRole('menuitem')[1]);
 
-      fireEvent.keyDown(document.activeElement, {key: 'Escape'});
-      fireEvent.keyUp(document.activeElement, {key: 'Escape'});
+      fireEvent.keyDown(document.activeElement, { key: 'Escape' });
+      fireEvent.keyUp(document.activeElement, { key: 'Escape' });
 
       act(() => jest.runAllTimers());
 
@@ -4040,24 +4046,24 @@ export let tableTests = () => {
       expect(document.activeElement).toEqual(input);
       expect(input.value).toBe('blah');
 
-      fireEvent.keyDown(input, {key: 'ArrowLeft', code: 37, charCode: 37});
-      fireEvent.keyUp(input, {key: 'ArrowLeft', code: 37, charCode: 37});
+      fireEvent.keyDown(input, { key: 'ArrowLeft', code: 37, charCode: 37 });
+      fireEvent.keyUp(input, { key: 'ArrowLeft', code: 37, charCode: 37 });
       act(() => {
         jest.runAllTimers();
       });
 
       expect(document.activeElement).toEqual(input);
 
-      fireEvent.keyDown(input, {key: 'ArrowRight', code: 39, charCode: 39});
-      fireEvent.keyUp(input, {key: 'ArrowRight', code: 39, charCode: 39});
+      fireEvent.keyDown(input, { key: 'ArrowRight', code: 39, charCode: 39 });
+      fireEvent.keyUp(input, { key: 'ArrowRight', code: 39, charCode: 39 });
       act(() => {
         jest.runAllTimers();
       });
 
       expect(document.activeElement).toEqual(input);
 
-      fireEvent.keyDown(input, {key: 'Escape', code: 27, charCode: 27});
-      fireEvent.keyUp(input, {key: 'Escape', code: 27, charCode: 27});
+      fireEvent.keyDown(input, { key: 'Escape', code: 27, charCode: 27 });
+      fireEvent.keyUp(input, { key: 'Escape', code: 27, charCode: 27 });
       act(() => {
         jest.runAllTimers();
       });
@@ -4169,7 +4175,7 @@ export let tableTests = () => {
     it('should fire onLoadMore when scrolling near the bottom', function () {
       let items = [];
       for (let i = 1; i <= 100; i++) {
-        items.push({id: i, foo: 'Foo ' + i, bar: 'Bar ' + i});
+        items.push({ id: i, foo: 'Foo ' + i, bar: 'Bar ' + i });
       }
 
       let onLoadMore = jest.fn();
@@ -4190,28 +4196,28 @@ export let tableTests = () => {
       );
 
       let body = tree.getAllByRole('rowgroup')[1];
-      let scrollView = body.parentNode.parentNode;
+      let scrollView = body;
 
       let rows = within(body).getAllByRole('row');
       expect(rows).toHaveLength(34); // each row is 41px tall. table is 1000px tall. 25 rows fit. + 1/3 overscan
 
       scrollView.scrollTop = 250;
       fireEvent.scroll(scrollView);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
       scrollView.scrollTop = 1500;
       fireEvent.scroll(scrollView);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
       scrollView.scrollTop = 2800;
       fireEvent.scroll(scrollView);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
       expect(onLoadMore).toHaveBeenCalledTimes(1);
     });
 
     it('should automatically fire onLoadMore if there aren\'t enough items to fill the Table', function () {
-      let items = [{id: 1, foo: 'Foo 1', bar: 'Bar 1'}];
+      let items = [{ id: 1, foo: 'Foo 1', bar: 'Bar 1' }];
       let onLoadMoreSpy = jest.fn();
 
       let TableMock = (props) => (
@@ -4270,7 +4276,7 @@ export let tableTests = () => {
 
     it('should set the proper aria-describedby and aria-sort on an ascending sorted column header', function () {
       let tree = render(
-        <TableView aria-label="Table" sortDescriptor={{column: 'bar', direction: 'ascending'}}>
+        <TableView aria-label="Table" sortDescriptor={{ column: 'bar', direction: 'ascending' }}>
           <TableHeader>
             <Column key="foo" allowsSorting>Foo</Column>
             <Column key="bar" allowsSorting>Bar</Column>
@@ -4301,7 +4307,7 @@ export let tableTests = () => {
 
     it('should set the proper aria-describedby and aria-sort on an descending sorted column header', function () {
       let tree = render(
-        <TableView aria-label="Table" sortDescriptor={{column: 'bar', direction: 'descending'}}>
+        <TableView aria-label="Table" sortDescriptor={{ column: 'bar', direction: 'descending' }}>
           <TableHeader>
             <Column key="foo" allowsSorting>Foo</Column>
             <Column key="bar" allowsSorting>Bar</Column>
@@ -4386,13 +4392,13 @@ export let tableTests = () => {
       await user.click(columnheaders[0]);
 
       expect(onSortChange).toHaveBeenCalledTimes(1);
-      expect(onSortChange).toHaveBeenCalledWith({column: 'foo', direction: 'ascending'});
+      expect(onSortChange).toHaveBeenCalledWith({ column: 'foo', direction: 'ascending' });
     });
 
     it('should toggle the sort direction from ascending to descending', async function () {
       let onSortChange = jest.fn();
       let tree = render(
-        <TableView aria-label="Table" sortDescriptor={{column: 'foo', direction: 'ascending'}} onSortChange={onSortChange}>
+        <TableView aria-label="Table" sortDescriptor={{ column: 'foo', direction: 'ascending' }} onSortChange={onSortChange}>
           <TableHeader>
             <Column key="foo" allowsSorting>Foo</Column>
             <Column key="bar" allowsSorting>Bar</Column>
@@ -4423,13 +4429,13 @@ export let tableTests = () => {
       await user.click(columnheaders[0]);
 
       expect(onSortChange).toHaveBeenCalledTimes(1);
-      expect(onSortChange).toHaveBeenCalledWith({column: 'foo', direction: 'descending'});
+      expect(onSortChange).toHaveBeenCalledWith({ column: 'foo', direction: 'descending' });
     });
 
     it('should toggle the sort direction from descending to ascending', async function () {
       let onSortChange = jest.fn();
       let tree = render(
-        <TableView aria-label="Table" sortDescriptor={{column: 'foo', direction: 'descending'}} onSortChange={onSortChange}>
+        <TableView aria-label="Table" sortDescriptor={{ column: 'foo', direction: 'descending' }} onSortChange={onSortChange}>
           <TableHeader>
             <Column key="foo" allowsSorting>Foo</Column>
             <Column key="bar" allowsSorting>Bar</Column>
@@ -4460,13 +4466,13 @@ export let tableTests = () => {
       await user.click(columnheaders[0]);
 
       expect(onSortChange).toHaveBeenCalledTimes(1);
-      expect(onSortChange).toHaveBeenCalledWith({column: 'foo', direction: 'ascending'});
+      expect(onSortChange).toHaveBeenCalledWith({ column: 'foo', direction: 'ascending' });
     });
 
     it('should trigger sorting on a different column', async function () {
       let onSortChange = jest.fn();
       let tree = render(
-        <TableView aria-label="Table" sortDescriptor={{column: 'foo', direction: 'ascending'}} onSortChange={onSortChange}>
+        <TableView aria-label="Table" sortDescriptor={{ column: 'foo', direction: 'ascending' }} onSortChange={onSortChange}>
           <TableHeader>
             <Column key="foo" allowsSorting>Foo</Column>
             <Column key="bar" allowsSorting>Bar</Column>
@@ -4497,7 +4503,7 @@ export let tableTests = () => {
       await user.click(columnheaders[1]);
 
       expect(onSortChange).toHaveBeenCalledTimes(1);
-      expect(onSortChange).toHaveBeenCalledWith({column: 'bar', direction: 'ascending'});
+      expect(onSortChange).toHaveBeenCalledWith({ column: 'bar', direction: 'ascending' });
     });
   });
 
@@ -4594,14 +4600,14 @@ export let tableTests = () => {
       expect(rows).toHaveLength(3);
       focusCell(tree, 'Height');
       expect(document.activeElement).toHaveTextContent('Height');
-      fireEvent.keyDown(document.activeElement, {key: 'Enter'});
-      fireEvent.keyUp(document.activeElement, {key: 'Enter'});
+      fireEvent.keyDown(document.activeElement, { key: 'Enter' });
+      fireEvent.keyUp(document.activeElement, { key: 'Enter' });
       act(() => jest.advanceTimersByTime(500));
       let table = tree.getByRole('grid');
       expect(document.activeElement).toBe(table);
       // Run the rest of the timeout and run the transitions
-      act(() => {jest.runAllTimers();});
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
+      act(() => { jest.runAllTimers(); });
       rows = tree.getAllByRole('row');
       expect(rows).toHaveLength(2);
     });
@@ -4621,7 +4627,7 @@ export let tableTests = () => {
       expect(document.activeElement).toBe(toggleButton);
       expect(tree.queryByRole('menuitem')).toBeFalsy();
       fireEvent.mouseEnter(headers[2]);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(tree.queryByRole('slider')).toBeFalsy();
     });
 
@@ -4635,34 +4641,34 @@ export let tableTests = () => {
       await user.tab();
       expect(document.activeElement).toBe(toggleButton);
       await user.click(toggleButton);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
 
       expect(selectAll).not.toHaveAttribute('disabled');
       await user.click(selectAll);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(selectAll.checked).toBeTruthy();
       expect(document.activeElement).toBe(selectAll);
 
       fireEvent.mouseEnter(headers[2]);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(tree.queryAllByRole('slider')).toBeTruthy();
 
       let column1Button = within(headers[1]).getByRole('button');
       let column2Button = within(headers[2]).getByRole('button');
       await user.click(column2Button);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(tree.queryAllByRole('menuitem')).toBeTruthy();
-      fireEvent.keyDown(document.activeElement, {key: 'Escape'});
-      fireEvent.keyUp(document.activeElement, {key: 'Escape'});
-      act(() => {jest.runAllTimers();});
-      act(() => {jest.runAllTimers();});
+      fireEvent.keyDown(document.activeElement, { key: 'Escape' });
+      fireEvent.keyUp(document.activeElement, { key: 'Escape' });
+      act(() => { jest.runAllTimers(); });
+      act(() => { jest.runAllTimers(); });
       expect(document.activeElement).toBe(column2Button);
-      fireEvent.keyDown(document.activeElement, {key: 'ArrowLeft', code: 37, charCode: 37});
-      fireEvent.keyUp(document.activeElement, {key: 'ArrowLeft', code: 37, charCode: 37});
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowLeft', code: 37, charCode: 37 });
+      fireEvent.keyUp(document.activeElement, { key: 'ArrowLeft', code: 37, charCode: 37 });
       expect(document.activeElement).toBe(column1Button);
 
       await user.click(toggleButton);
-      act(() => {jest.runAllTimers();});
+      act(() => { jest.runAllTimers(); });
       expect(selectAll).toHaveAttribute('disabled');
       await user.click(headers[2]);
       expect(document.activeElement).toBe(toggleButton);
@@ -4678,13 +4684,13 @@ export let tableTests = () => {
         if (type === 'mouse') {
           await user.click(item);
         } else {
-          fireEvent.keyDown(item, {key});
-          fireEvent.keyUp(item, {key});
+          fireEvent.keyDown(item, { key });
+          fireEvent.keyUp(item, { key });
         }
       };
 
       it('should support links with selectionMode="none"', async function () {
-        let {getAllByRole} = render(
+        let { getAllByRole } = render(
           <Provider theme={theme}>
             <TableView aria-label="Table">
               <TableHeader>
@@ -4722,7 +4728,7 @@ export let tableTests = () => {
       });
 
       it.each(['single', 'multiple'])('should support links with selectionStyle="checkbox" selectionMode="%s"', async function (selectionMode) {
-        let {getAllByRole} = render(
+        let { getAllByRole } = render(
           <Provider theme={theme}>
             <TableView aria-label="Table" selectionMode={selectionMode}>
               <TableHeader>
@@ -4768,7 +4774,7 @@ export let tableTests = () => {
       });
 
       it.each(['single', 'multiple'])('should support links with selectionStyle="highlight" selectionMode="%s"', async function (selectionMode) {
-        let {getAllByRole} = render(
+        let { getAllByRole } = render(
           <Provider theme={theme}>
             <TableView aria-label="Table" selectionMode={selectionMode} selectionStyle="highlight">
               <TableHeader>
@@ -4805,10 +4811,10 @@ export let tableTests = () => {
         document.removeEventListener('click', onClick);
 
         if (type === 'mouse') {
-          await user.dblClick(items[0], {pointerType: 'mouse'});
+          await user.dblClick(items[0], { pointerType: 'mouse' });
         } else {
-          fireEvent.keyDown(items[0], {key: 'Enter'});
-          fireEvent.keyUp(items[0], {key: 'Enter'});
+          fireEvent.keyDown(items[0], { key: 'Enter' });
+          fireEvent.keyUp(items[0], { key: 'Enter' });
         }
         expect(onClick).toHaveBeenCalledTimes(1);
         expect(onClick.mock.calls[0][0].target).toBeInstanceOf(HTMLAnchorElement);
@@ -4817,8 +4823,8 @@ export let tableTests = () => {
 
       it('should work with RouterProvider', async () => {
         let navigate = jest.fn();
-        let {getAllByRole} = render(
-          <Provider theme={theme} router={{navigate}}>
+        let { getAllByRole } = render(
+          <Provider theme={theme} router={{ navigate }}>
             <TableView aria-label="Table">
               <TableHeader>
                 <Column>Foo</Column>
@@ -4826,7 +4832,7 @@ export let tableTests = () => {
                 <Column>Baz</Column>
               </TableHeader>
               <TableBody>
-                <Row href="/one" routerOptions={{foo: 'bar'}}>
+                <Row href="/one" routerOptions={{ foo: 'bar' }}>
                   <Cell>Foo 1</Cell>
                   <Cell>Bar 1</Cell>
                   <Cell>Baz 1</Cell>
@@ -4843,7 +4849,7 @@ export let tableTests = () => {
 
         let items = getAllByRole('row').slice(1);
         await trigger(items[0]);
-        expect(navigate).toHaveBeenCalledWith('/one', {foo: 'bar'});
+        expect(navigate).toHaveBeenCalledWith('/one', { foo: 'bar' });
 
         navigate.mockReset();
         let onClick = mockClickDefault();
