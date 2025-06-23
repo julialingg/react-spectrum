@@ -10,17 +10,17 @@
  * governing permissions and limitations under the License.
  */
 
-import {act, fireEvent, render as render_, within} from '@testing-library/react';
-import {CalendarDate, parseZonedDateTime} from '@internationalized/date';
-import {DatePicker, DateRangePicker} from '../';
-import {installPointerEvent} from '@react-spectrum/test-utils';
-import {Provider} from '@react-spectrum/provider';
+import { act, fireEvent, render as render_, within } from '@testing-library/react';
+import { CalendarDate, parseZonedDateTime } from '@internationalized/date';
+import { DatePicker, DateRangePicker } from '../';
+import { installPointerEvent } from '@react-spectrum/test-utils';
+import { Provider } from '@react-spectrum/provider';
 import React from 'react';
-import {theme} from '@react-spectrum/theme-default';
-import {triggerPress} from '@react-spectrum/test-utils';
+import { theme } from '@react-spectrum/theme-default';
+import { triggerPress } from '@react-spectrum/test-utils';
 
 function pointerEvent(type, opts) {
-  let evt = new Event(type, {bubbles: true, cancelable: true});
+  let evt = new Event(type, { bubbles: true, cancelable: true });
   Object.assign(evt, {
     ctrlKey: false,
     metaKey: false,
@@ -47,8 +47,8 @@ describe('DatePickerBase', function () {
       Name                   | Component            | numSegments
       ${'DatePicker'}        | ${DatePicker}        | ${3}
       ${'DateRangePicker'}   | ${DateRangePicker}   | ${6}
-    `('$Name should render a default datepicker', ({Component, numSegments}) => {
-      let {getAllByRole} = render(<Component label="Date" />);
+    `('$Name should render a default datepicker', ({ Component, numSegments }) => {
+      let { getAllByRole } = render(<Component label="Date" />);
 
       let combobox = getAllByRole('group')[0];
       expect(combobox).toBeVisible();
@@ -66,15 +66,15 @@ describe('DatePickerBase', function () {
 
       let button = getAllByRole('button')[0];
       expect(button).toBeVisible();
-      expect(button).toHaveAttribute('tabindex', '-1');
+      expect(button).not.toHaveAttribute('tabindex');
     });
 
     it.each`
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should set aria-disabled when isDisabled', ({Component}) => {
-      let {getAllByRole} = render(<Component label="Date" isDisabled />);
+    `('$Name should set aria-disabled when isDisabled', ({ Component }) => {
+      let { getAllByRole } = render(<Component label="Date" isDisabled />);
 
       let combobox = getAllByRole('group')[0];
       expect(combobox).toHaveAttribute('aria-disabled', 'true');
@@ -94,8 +94,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should set aria-readonly when isReadOnly', ({Component}) => {
-      let {getAllByRole} = render(<Component label="Date" isReadOnly />);
+    `('$Name should set aria-readonly when isReadOnly', ({ Component }) => {
+      let { getAllByRole } = render(<Component label="Date" isReadOnly />);
 
       let combobox = getAllByRole('group')[0];
       expect(combobox).not.toHaveAttribute('aria-readonly', 'true');
@@ -113,8 +113,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should set aria-required when isRequired', ({Component}) => {
-      let {getAllByRole} = render(<Component label="Date" isRequired />);
+    `('$Name should set aria-required when isRequired', ({ Component }) => {
+      let { getAllByRole } = render(<Component label="Date" isRequired />);
 
       let combobox = getAllByRole('group')[0];
       expect(combobox).not.toHaveAttribute('aria-required', 'true');
@@ -129,8 +129,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should set aria-invalid when validationState="invalid"', ({Component}) => {
-      let {getAllByRole} = render(<Component label="Date" validationState="invalid" />);
+    `('$Name should set aria-invalid when validationState="invalid"', ({ Component }) => {
+      let { getAllByRole } = render(<Component label="Date" validationState="invalid" />);
 
       let combobox = getAllByRole('group')[0];
       expect(combobox).not.toHaveAttribute('aria-invalid', 'true');
@@ -145,8 +145,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should set aria-readonly on non-editable segments', ({Component}) => {
-      let {getAllByTestId} = render(<Component label="Date" placeholderValue={parseZonedDateTime('2021-11-07T00:45-07:00[America/Los_Angeles]')} />);
+    `('$Name should set aria-readonly on non-editable segments', ({ Component }) => {
+      let { getAllByTestId } = render(<Component label="Date" placeholderValue={parseZonedDateTime('2021-11-07T00:45-07:00[America/Los_Angeles]')} />);
 
       let timezones = getAllByTestId('timeZoneName');
       for (let tz of timezones) {
@@ -161,8 +161,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should focus placeholderValue in calendar', ({Component}) => {
-      let {getByRole} = render(<Component label="Date" placeholderValue={new CalendarDate(2019, 6, 5)} />);
+    `('$Name should focus placeholderValue in calendar', ({ Component }) => {
+      let { getByRole } = render(<Component label="Date" placeholderValue={new CalendarDate(2019, 6, 5)} />);
 
       let button = getByRole('button');
       triggerPress(button);
@@ -174,10 +174,10 @@ describe('DatePickerBase', function () {
 
     it.each`
       Name                   | Component          | props
-      ${'DatePicker'}        | ${DatePicker}      | ${{defaultValue: new CalendarDate(2019, 7, 5)}}
-      ${'DateRangePicker'}   | ${DateRangePicker} | ${{defaultValue: {start: new CalendarDate(2019, 7, 5), end: new CalendarDate(2019, 7, 10)}}}
-    `('$Name should focus selected date over placeholderValue', ({Component, props}) => {
-      let {getByRole} = render(<Component label="Date" {...props} placeholderValue={new CalendarDate(2019, 6, 5)} />);
+      ${'DatePicker'}        | ${DatePicker}      | ${{ defaultValue: new CalendarDate(2019, 7, 5) }}
+      ${'DateRangePicker'}   | ${DateRangePicker} | ${{ defaultValue: { start: new CalendarDate(2019, 7, 5), end: new CalendarDate(2019, 7, 10) } }}
+    `('$Name should focus selected date over placeholderValue', ({ Component, props }) => {
+      let { getByRole } = render(<Component label="Date" {...props} placeholderValue={new CalendarDate(2019, 6, 5)} />);
 
       let button = getByRole('button');
       triggerPress(button);
@@ -191,8 +191,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should respond to provider props', ({Component}) => {
-      let {getAllByRole} = render(
+    `('$Name should respond to provider props', ({ Component }) => {
+      let { getAllByRole } = render(
         <Provider theme={theme} isDisabled>
           <Component label="Date" isDisabled />
         </Provider>
@@ -216,8 +216,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should open a calendar popover when clicking the button', ({Component}) => {
-      let {getAllByRole} = render(
+    `('$Name should open a calendar popover when clicking the button', ({ Component }) => {
+      let { getAllByRole } = render(
         <Provider theme={theme}>
           <Component label="Date" />
         </Provider>
@@ -261,8 +261,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should open a calendar popover pressing Alt + ArrowDown on the keyboard', ({Component}) => {
-      let {getAllByRole} = render(
+    `('$Name should open a calendar popover pressing Alt + ArrowDown on the keyboard', ({ Component }) => {
+      let { getAllByRole } = render(
         <Provider theme={theme}>
           <Component label="Date" />
         </Provider>
@@ -283,7 +283,7 @@ describe('DatePickerBase', function () {
       expect(button).toHaveAttribute('aria-haspopup', 'dialog');
       expect(button).not.toHaveAttribute('aria-controls');
 
-      fireEvent.keyDown(combobox, {key: 'ArrowDown', altKey: true});
+      fireEvent.keyDown(combobox, { key: 'ArrowDown', altKey: true });
 
       let dialog = getAllByRole('dialog')[0];
       expect(dialog).toBeVisible();
@@ -305,8 +305,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should open a calendar popover when tapping on the date field with a touch device', ({Component}) => {
-      let {getAllByRole} = render(
+    `('$Name should open a calendar popover when tapping on the date field with a touch device', ({ Component }) => {
+      let { getAllByRole } = render(
         <Provider theme={theme}>
           <Component label="Date" />
         </Provider>
@@ -327,8 +327,8 @@ describe('DatePickerBase', function () {
       expect(button).toHaveAttribute('aria-haspopup', 'dialog');
       expect(button).not.toHaveAttribute('aria-controls');
 
-      fireEvent.touchStart(combobox, {targetTouches: [{identifier: 1}]});
-      fireEvent.touchEnd(combobox, {changedTouches: [{identifier: 1, clientX: 0, clientY: 0}]});
+      fireEvent.touchStart(combobox, { targetTouches: [{ identifier: 1 }] });
+      fireEvent.touchEnd(combobox, { changedTouches: [{ identifier: 1, clientX: 0, clientY: 0 }] });
 
       let dialog = getAllByRole('dialog')[0];
       expect(dialog).toBeVisible();
@@ -348,10 +348,10 @@ describe('DatePickerBase', function () {
 
     it.each`
       Name                   | Component          | props
-      ${'DatePicker'}        | ${DatePicker}      | ${{defaultValue: new CalendarDate(2021, 10, 3)}}
-      ${'DateRangePicker'}   | ${DateRangePicker} | ${{defaultValue: {start: new CalendarDate(2021, 10, 3), end: new CalendarDate(2021, 10, 4)}}}
-    `('$Name should pass validationState and errorMessage to calendar', ({Component, props}) => {
-      let {getAllByRole} = render(
+      ${'DatePicker'}        | ${DatePicker}      | ${{ defaultValue: new CalendarDate(2021, 10, 3) }}
+      ${'DateRangePicker'}   | ${DateRangePicker} | ${{ defaultValue: { start: new CalendarDate(2021, 10, 3), end: new CalendarDate(2021, 10, 4) } }}
+    `('$Name should pass validationState and errorMessage to calendar', ({ Component, props }) => {
+      let { getAllByRole } = render(
         <Provider theme={theme}>
           <Component {...props} label="Date" errorMessage="Selected dates cannot include weekends." validationState="invalid" />
         </Provider>
@@ -366,7 +366,7 @@ describe('DatePickerBase', function () {
 
       let dialog = getAllByRole('dialog')[0];
       let grid = within(dialog).getByRole('grid');
-      let cell = within(grid).getAllByLabelText('selected', {exact: false})[0];
+      let cell = within(grid).getAllByLabelText('selected', { exact: false })[0];
       let description = cell.getAttribute('aria-describedby').split(' ').map(id => document.getElementById(id).textContent).join(' ');
       expect(description.startsWith('Selected dates cannot include weekends.')).toBe(true);
     });
@@ -379,20 +379,24 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should support arrow keys to move between segments', ({Component}) => {
-      let {getAllByRole} = render(<Component label="Date" />);
+    `('$Name should support arrow keys to move between segments', ({ Component }) => {
+      let { getAllByRole } = render(<Component label="Date" />);
 
       let segments = getAllByRole('spinbutton');
-      act(() => {segments[0].focus();});
+      let button = getAllByRole('button')[0];
+      act(() => { segments[0].focus(); });
 
       for (let i = 0; i < segments.length; i++) {
         expect(segments[i]).toHaveFocus();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowRight'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowRight' });
       }
+
+      expect(button).toHaveFocus();
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowLeft' });
 
       for (let i = segments.length - 1; i >= 0; i--) {
         expect(segments[i]).toHaveFocus();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowLeft'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowLeft' });
       }
     });
 
@@ -400,24 +404,28 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should support arrow keys to move between segments in an RTL locale', ({Component}) => {
-      let {getAllByRole} = render(
+    `('$Name should support arrow keys to move between segments in an RTL locale', ({ Component }) => {
+      let { getAllByRole } = render(
         <Provider theme={theme} locale="ar-EG">
           <Component label="Date" value={new CalendarDate(2019, 2, 3)} />
         </Provider>
       );
 
       let segments = getAllByRole('spinbutton');
-      act(() => {segments[0].focus();});
+      let button = getAllByRole('button')[0];
+      act(() => { segments[0].focus(); });
 
       for (let i = 0; i < segments.length; i++) {
         expect(segments[i]).toHaveFocus();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowLeft'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowLeft' });
       }
+
+      expect(button).toHaveFocus();
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowRight' });
 
       for (let i = segments.length - 1; i >= 0; i--) {
         expect(segments[i]).toHaveFocus();
-        fireEvent.keyDown(document.activeElement, {key: 'ArrowRight'});
+        fireEvent.keyDown(document.activeElement, { key: 'ArrowRight' });
       }
     });
 
@@ -425,12 +433,12 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should focus the previous segment on mouse down on a literal segment', ({Component}) => {
-      let {getAllByRole, getAllByText} = render(<Component label="Date" />);
+    `('$Name should focus the previous segment on mouse down on a literal segment', ({ Component }) => {
+      let { getAllByRole, getAllByText } = render(<Component label="Date" />);
       let literals = getAllByText('/');
       let segments = getAllByRole('spinbutton');
 
-      fireEvent(literals[0], pointerEvent('pointerdown', {pointerId: 1, pointerType: 'mouse'}));
+      fireEvent(literals[0], pointerEvent('pointerdown', { pointerId: 1, pointerType: 'mouse' }));
       expect(segments[0]).toHaveFocus();
     });
 
@@ -438,8 +446,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should not be focusable when isDisabled', ({Component}) => {
-      let {getAllByRole} = render(<Component label="Date"isDisabled />);
+    `('$Name should not be focusable when isDisabled', ({ Component }) => {
+      let { getAllByRole } = render(<Component label="Date" isDisabled />);
       let segments = getAllByRole('spinbutton');
       for (let segment of segments) {
         expect(segment).not.toHaveAttribute('tabIndex');
@@ -450,8 +458,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should focus the first segment by default if autoFocus is set', ({Component}) => {
-      let {getAllByRole} = render(<Component label="Date" autoFocus />);
+    `('$Name should focus the first segment by default if autoFocus is set', ({ Component }) => {
+      let { getAllByRole } = render(<Component label="Date" autoFocus />);
 
       let segments = getAllByRole('spinbutton');
       expect(segments[0]).toHaveFocus();
@@ -463,8 +471,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should display an error icon when validationState="invalid"', ({Component}) => {
-      let {getByTestId} = render(<Component label="Date" validationState="invalid" />);
+    `('$Name should display an error icon when validationState="invalid"', ({ Component }) => {
+      let { getByTestId } = render(<Component label="Date" validationState="invalid" />);
       expect(getByTestId('invalid-icon')).toBeVisible();
     });
 
@@ -472,8 +480,8 @@ describe('DatePickerBase', function () {
       Name                   | Component
       ${'DatePicker'}        | ${DatePicker}
       ${'DateRangePicker'}   | ${DateRangePicker}
-    `('$Name should display an checkmark icon when validationState="valid"', ({Component}) => {
-      let {getByTestId} = render(<Component label="Date" validationState="valid" />);
+    `('$Name should display an checkmark icon when validationState="valid"', ({ Component }) => {
+      let { getByTestId } = render(<Component label="Date" validationState="valid" />);
       expect(getByTestId('valid-icon')).toBeVisible();
     });
   });
